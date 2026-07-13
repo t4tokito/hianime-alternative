@@ -6,8 +6,8 @@ import Link from "next/link";
 import type { Anime } from "@/lib/types";
 
 const STREAM_SERVERS = [
-  { name: "Server 1", base: "https://zokoanime.video/stream/mal" },
-  { name: "Server 2", base: "https://animeplay.cfd/stream/mal" },
+  { name: "Server 1", base: "https://animeplay.cfd/stream/mal" },
+  { name: "Server 2", base: "https://zokoanime.video/stream/mal" },
 ];
 
 export default function WatchPage() {
