@@ -37,7 +37,14 @@ export async function getHomePage() {
 
 export async function searchAnimeExternal(query: string, page = 1): Promise<Anime[]> {
   const results = await anilistSearch(query, page);
-  return results.media.map(toAnime);
+  return results.media.map((m) => {
+    try {
+      return toAnime(m);
+    } catch (e) {
+      console.error("toAnime error:", e, m);
+      return null;
+    }
+  }).filter(Boolean) as Anime[];
 }
 
 export async function getAnimeDetails(id: number): Promise<Anime | null> {
