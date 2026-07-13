@@ -283,13 +283,13 @@ export function toAnime(anilist: AniListMedia): {
         format: e.node.format || "",
         image: "",
       })) || [],
-    recommended: anilist.recommendations?.nodes?.map((n) => ({
-      id: n.mediaRecommendation.id,
-      title: n.mediaRecommendation.title.english || n.mediaRecommendation.title.romaji || "",
-      format: n.mediaRecommendation.format || "",
-      image: n.mediaRecommendation.coverImage?.large || "",
-      score: n.mediaRecommendation.averageScore,
-      episodes: n.mediaRecommendation.episodes,
+    recommended: anilist.recommendations?.nodes?.filter((n) => n.mediaRecommendation).map((n) => ({
+      id: n.mediaRecommendation!.id,
+      title: n.mediaRecommendation!.title.english || n.mediaRecommendation!.title.romaji || "",
+      format: n.mediaRecommendation!.format || "",
+      image: n.mediaRecommendation!.coverImage?.large || "",
+      score: n.mediaRecommendation!.averageScore,
+      episodes: n.mediaRecommendation!.episodes,
     })) || [],
     characters: anilist.characters?.edges?.map((e) => ({
       name: e.node.name.full,
