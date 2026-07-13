@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-
-const API_BASE = "https://animedata.cfd/api";
+import { getAnimeById, toAnime } from "@/lib/anilist";
 
 export async function GET(
   request: NextRequest,
@@ -8,24 +7,13 @@ export async function GET(
 ) {
   try {
     const { id } = await params;
-    // Try fetching the home page and finding the anime by _id
-    const res = await fetch(`${API_BASE}/home`, { next: { revalidate: 300 } });
-    const data = await res.json();
+    const anilistId = parseInt(id.replace("anilist-", ""), 10);
+    if (isNaN(anilistId)) return NextResponse.json(null, { status: 400 });
 
-    const allAnime = [
-      ...data.trending?.animes || [],
-      ...data.popular?.animes || [],
-      ...data.currentlyAiring?.animes || [],
-      ...data.finishedAiring?.animes || [],
-      ...data.latestAnime?.animes || [],
-    ];
+    const media = await getAnimeById(anilistId);
+    if (!media) return NextResponse.json(null, { status: 404 });
 
-    const anime = allAnime.find((a: { _id?: string; slug?: string }) => a._id === id || a.slug === id);
-    if (anime) {
-      return NextResponse.json(anime);
-    }
-
-    return NextResponse.json(null, { status: 404 });
+    return NextResponse.json(toAnime(media));
   } catch {
     return NextResponse.json(null, { status: 500 });
   }

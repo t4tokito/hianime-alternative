@@ -3,17 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
-import { getEpisodeDetails } from "@/lib/api";
-import type { Anime, EpisodeData } from "@/lib/types";
-
-interface JikanEpisode {
-  mal_id: number;
-  number: number;
-  title: string;
-  title_japanese?: string;
-  aired: string;
-  score?: number;
-}
+import type { Anime } from "@/lib/types";
 
 const STREAM_SERVERS = [
   { name: "Server 1", base: "https://zokoanime.video/stream/mal" },
@@ -24,83 +14,51 @@ export default function WatchPage() {
   const params = useParams();
   const slug = params.slug as string;
 
-  const [episodeData, setEpisodeData] = useState<EpisodeData | null>(null);
-  const [jikanEpisodes, setJikanEpisodes] = useState<JikanEpisode[]>([]);
+  const [anime, setAnime] = useState<Anime | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const [activeTab, setActiveTab] = useState<"sub" | "dub">("sub");
   const [activeServer, setActiveServer] = useState(0);
-  const [malId, setMalId] = useState<number | null>(null);
-  const [totalEpisodes, setTotalEpisodes] = useState(0);
+  const [currentEp, setCurrentEp] = useState(1);
+
+  // Parse slug to get anime ID and episode number
+  // Pattern: "anilist-{id}-episode-{num}" or "{id}-episode-{num}"
+  const parseSlug = (s: string) => {
+    const epMatch = s.match(/episode-(\d+)/);
+    const epNum = epMatch ? parseInt(epMatch[1], 10) : 1;
+    const animeSlug = s.replace(/-episode-\d+.*$/, '');
+    const idMatch = animeSlug.match(/(\d+)$/);
+    const anilistId = idMatch ? parseInt(idMatch[1], 10) : null;
+    return { anilistId, epNum, animeSlug };
+  };
+
+  const { anilistId, epNum } = parseSlug(slug);
+  useEffect(() => { setCurrentEp(epNum); }, [epNum]);
 
   useEffect(() => {
+    if (!anilistId) {
+      setError(true);
+      setLoading(false);
+      return;
+    }
+
     setLoading(true);
     setError(false);
-    setEpisodeData(null);
-    setActiveServer(0);
-    setJikanEpisodes([]);
-    setMalId(null);
 
-    getEpisodeDetails(slug)
-      .then(async (data) => {
-        setEpisodeData(data);
-        if (data.episode?.link?.dub?.length === 0) setActiveTab("sub");
-
-        const animeIdRaw = data.episode?.anime_id;
-        let foundMalId: number | null = null;
-
-        if (typeof animeIdRaw === 'object' && animeIdRaw !== null) {
-          foundMalId = animeIdRaw.mal_id || null;
-        }
-
-        if (!foundMalId) {
-          setLoading(false);
-          return;
-        }
-
-        setMalId(foundMalId);
-
-        // Fetch episode list from Jikan API (MAL)
-        try {
-          const allEps: JikanEpisode[] = [];
-          for (let page = 1; page <= 10; page++) {
-            const res = await fetch(`https://api.jikan.moe/v4/anime/${foundMalId}/episodes?page=${page}`);
-            if (!res.ok) break;
-            const jikanData = await res.json();
-            const eps = jikanData.data || [];
-            if (eps.length === 0) break;
-            allEps.push(...eps);
-            if (!jikanData.pagination?.has_next_page) break;
-            // Jikan rate limit: 3 req/sec
-            await new Promise(r => setTimeout(r, 400));
-          }
-          setJikanEpisodes(allEps);
-          setTotalEpisodes(allEps.length || (allEps.length > 0 ? allEps[allEps.length - 1].number : 0));
-        } catch {
-          // Jikan failed, continue without episode list
-        }
+    fetch(`/api/anime/${anilistId}`)
+      .then((res) => res.json())
+      .then((data) => {
+        if (data) setAnime(data);
+        else setError(true);
       })
       .catch(() => setError(true))
       .finally(() => setLoading(false));
-  }, [slug]);
+  }, [anilistId]);
 
-  const links = episodeData?.episode?.link;
-  const currentLinks = activeTab === "dub" ? links?.dub : links?.sub;
-
-  // Build stream URL from pattern
-  const currentEpNumber = episodeData?.episode?.episodeNumber;
-  const streamUrl = malId && currentEpNumber
-    ? `${STREAM_SERVERS[activeServer].base}/${malId}/${currentEpNumber}/${activeTab}`
-    : currentLinks?.[activeServer] || currentLinks?.[0] || '';
-
-  const animeInfo = episodeData?.episode?.anime_id;
-  const epTitle = episodeData?.episode?.title || '';
-
-  const animeTitle = (animeInfo && typeof animeInfo === 'object')
-    ? (animeInfo as Anime).title || ''
-    : '';
-  const detailsSlug = (animeInfo && typeof animeInfo === 'object')
-    ? (animeInfo as Anime)._id || ''
+  const malId = anime?.mal_id;
+  const totalEps = anime?.episodes || 0;
+  const streamUrl = malId
+    ? `${STREAM_SERVERS[activeServer].base}/${malId}/${currentEp}/${activeTab}`
     : '';
 
   const handleServerChange = useCallback((tab: "sub" | "dub") => {
@@ -108,44 +66,32 @@ export default function WatchPage() {
     setActiveServer(0);
   }, []);
 
-  const handleServerIdxChange = useCallback((idx: number) => {
-    setActiveServer(idx);
-  }, []);
+  const getWatchUrl = (ep: number) => {
+    return `/watch/${slug.replace(/episode-\d+/, `episode-${ep}`)}`;
+  };
 
-  // Find current episode index in Jikan list
-  const currentJikanIdx = jikanEpisodes.findIndex(e => e.number === currentEpNumber);
-  const prevEpNumber = currentJikanIdx > 0 ? jikanEpisodes[currentJikanIdx - 1].number : null;
-  const nextEpNumber = currentJikanIdx >= 0 && currentJikanIdx < jikanEpisodes.length - 1
-    ? jikanEpisodes[currentJikanIdx + 1].number : null;
+  const title = anime?.English || anime?.title || '';
 
   if (loading) {
     return (
       <div className="max-w-[1900px] mx-auto px-4 md:px-8 py-6">
         <div className="skeleton aspect-video rounded-xl mb-4" />
         <div className="skeleton h-8 w-64 rounded mb-2" />
-        <div className="skeleton h-4 w-96 rounded" />
       </div>
     );
   }
 
-  if (error || !episodeData) {
+  if (error || !anime) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
         <div className="text-center">
-          <h1 className="text-2xl font-bold text-foreground mb-2">Failed to load episode</h1>
+          <h1 className="text-2xl font-bold text-foreground mb-2">Failed to load</h1>
+          <p className="text-muted mb-4">Could not find anime data for this episode</p>
           <Link href="/" className="text-primary hover:underline">Go back home</Link>
         </div>
       </div>
     );
   }
-
-  // Generate watch URLs for episodes using the slug pattern
-  const getWatchUrl = (epNum: number) => {
-    // We need to construct a valid slug that the episode endpoint can resolve
-    // Use the current anime name + episode number pattern
-    const animeName = animeTitle.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
-    return `/watch/${animeName}-episode-${epNum}`;
-  };
 
   return (
     <div className="max-w-[1900px] mx-auto px-4 md:px-8 py-6">
@@ -164,36 +110,31 @@ export default function WatchPage() {
             </div>
           ) : (
             <div className="aspect-video rounded-xl bg-card border border-border flex items-center justify-center">
-              <p className="text-muted">No stream available</p>
+              <p className="text-muted">No stream available{!malId ? " (MAL ID not found)" : ""}</p>
             </div>
           )}
 
           <div className="mt-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div>
               <h1 className="text-lg font-bold text-foreground">
-                {epTitle || `Episode ${currentEpNumber || ''}`}
+                Episode {currentEp}{title ? ` - ${title}` : ''}
               </h1>
-              {animeTitle && (
-                <Link
-                  href={detailsSlug ? `/details/${detailsSlug}` : '#'}
-                  className="text-sm text-primary hover:underline"
-                >
-                  {animeTitle}
-                </Link>
-              )}
+              <Link href={`/details/${anime._id}`} className="text-sm text-primary hover:underline">
+                {title}
+              </Link>
             </div>
             <div className="flex gap-2">
-              {prevEpNumber && (
+              {currentEp > 1 && (
                 <Link
-                  href={getWatchUrl(prevEpNumber)}
+                  href={getWatchUrl(currentEp - 1)}
                   className="px-4 py-2 rounded-lg bg-card border border-border text-sm text-foreground hover:border-primary transition-colors"
                 >
                   &larr; Prev
                 </Link>
               )}
-              {nextEpNumber && (
+              {currentEp < totalEps && (
                 <Link
-                  href={getWatchUrl(nextEpNumber)}
+                  href={getWatchUrl(currentEp + 1)}
                   className="px-4 py-2 rounded-lg bg-primary text-white text-sm hover:bg-primary/90 transition-colors"
                 >
                   Next &rarr;
@@ -225,14 +166,13 @@ export default function WatchPage() {
                 Dub
               </button>
             </div>
-
             <div className="p-3">
               <p className="text-xs text-muted mb-2 uppercase tracking-wider">Servers</p>
               <div className="space-y-1.5">
                 {STREAM_SERVERS.map((server, idx) => (
                   <button
                     key={idx}
-                    onClick={() => handleServerIdxChange(idx)}
+                    onClick={() => setActiveServer(idx)}
                     className={`w-full px-3 py-2 rounded-lg text-sm text-left transition-colors ${
                       activeServer === idx
                         ? "bg-primary text-white"
@@ -246,25 +186,25 @@ export default function WatchPage() {
             </div>
           </div>
 
-          {/* Episode Grid from Jikan */}
-          {jikanEpisodes.length > 0 && (
+          {/* Episode Grid */}
+          {totalEps > 0 && (
             <div className="mt-4 bg-card border border-border rounded-xl overflow-hidden">
               <div className="p-3 border-b border-border">
-                <p className="text-sm font-medium text-foreground">{animeTitle || 'Episodes'}</p>
-                <p className="text-xs text-muted">{jikanEpisodes.length} episodes</p>
+                <p className="text-sm font-medium text-foreground">{title}</p>
+                <p className="text-xs text-muted">{totalEps} episodes</p>
               </div>
               <div className="p-3 grid grid-cols-5 gap-2 max-h-[400px] overflow-y-auto">
-                {jikanEpisodes.map((ep) => (
+                {Array.from({ length: totalEps }, (_, i) => i + 1).map((ep) => (
                   <Link
-                    key={ep.mal_id}
-                    href={getWatchUrl(ep.number)}
+                    key={ep}
+                    href={getWatchUrl(ep)}
                     className={`flex items-center justify-center h-10 rounded-lg text-sm font-medium transition-colors ${
-                      ep.number === currentEpNumber
+                      ep === currentEp
                         ? "bg-primary text-white ring-2 ring-primary/50"
                         : "bg-surface text-foreground hover:bg-card-hover border border-border"
                     }`}
                   >
-                    {ep.number}
+                    {ep}
                   </Link>
                 ))}
               </div>

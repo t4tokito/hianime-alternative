@@ -1,37 +1,13 @@
 import Link from "next/link";
 import type { Anime } from "@/lib/types";
-import { getImageUrl, getTitle, getSlug } from "@/lib/api";
+import { getImageUrl, getTitle } from "@/lib/api";
 
 export default function AnimeCard({ anime, href }: { anime: Anime; href?: string }) {
   const image = getImageUrl(anime);
   const title = getTitle(anime);
 
-  // Determine the correct link based on data type
-  let link = href || '#';
-
-  if (!href) {
-    // Episode objects have a `link` field with sub/dub streams
-    const isEpisode = anime.link && (anime.link.sub?.length || anime.link.dub?.length);
-
-    if (isEpisode && anime.slug) {
-      // Episode → link to watch page
-      link = `/watch/${anime.slug}`;
-    } else if (anime._id) {
-      // Anime from home data → link to details by _id
-      link = `/details/${anime._id}`;
-    } else if (anime.slug) {
-      // Anime with slug → link to details by slug
-      link = `/details/${anime.slug}`;
-    } else if (title) {
-      // Search results (no _id, no slug) → link to details by title
-      link = `/details/title/${encodeURIComponent(title)}`;
-    }
-  }
-
-  // For episodes, show anime title from anime_id if available
-  const displayTitle = (anime.anime_id && typeof anime.anime_id === 'object')
-    ? (anime.anime_id as Anime).title || title
-    : title;
+  // AniList IDs are in format "anilist-{id}" or just the _id
+  const link = href || (anime._id ? `/details/${anime._id}` : '#');
 
   return (
     <Link href={link} className="group block">
@@ -39,7 +15,7 @@ export default function AnimeCard({ anime, href }: { anime: Anime; href?: string
         {image ? (
           <img
             src={image}
-            alt={displayTitle}
+            alt={title}
             className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
           />
         ) : (
@@ -57,35 +33,23 @@ export default function AnimeCard({ anime, href }: { anime: Anime; href?: string
             </svg>
           </div>
         </div>
-        {(anime.totalSubbed || anime.totalDubbed) && (
-          <div className="absolute bottom-2 left-2 flex gap-0.5">
-            {anime.totalSubbed ? (
-              <span className="text-[10px] px-1.5 py-0.5 rounded-l bg-green-300 text-black font-medium">
-                SUB {anime.totalSubbed}
-              </span>
-            ) : null}
-            {anime.totalDubbed ? (
-              <span className="text-[10px] px-1.5 py-0.5 rounded-r bg-sky-300 text-black font-medium">
-                DUB {anime.totalDubbed}
-              </span>
-            ) : null}
-          </div>
-        )}
         {anime.Type && (
           <span className="absolute top-2 right-2 text-[10px] px-1.5 py-0.5 rounded bg-primary/80 text-white font-medium">
             {anime.Type}
           </span>
         )}
+        {anime.Score && anime.Score !== "N/A" && (
+          <span className="absolute top-2 left-2 text-[10px] px-1.5 py-0.5 rounded bg-yellow-500/80 text-black font-medium">
+            {anime.Score}
+          </span>
+        )}
       </div>
       <div className="mt-2 px-0.5">
         <h3 className="text-sm font-medium text-foreground line-clamp-2 group-hover:text-primary transition-colors">
-          {displayTitle}
+          {title}
         </h3>
-        {anime.Duration && (
-          <p className="text-xs text-muted mt-0.5">{anime.Duration}</p>
-        )}
-        {anime.episodeNumber && (
-          <p className="text-xs text-muted mt-0.5">Ep {anime.episodeNumber}</p>
+        {anime.episodes && anime.episodes > 0 && (
+          <p className="text-xs text-muted mt-0.5">{anime.episodes} eps</p>
         )}
       </div>
     </Link>

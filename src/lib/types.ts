@@ -1,7 +1,7 @@
 export interface Anime {
   _id?: string;
   id?: string;
-  mal_id?: number;
+  mal_id?: number | null;
   title: string;
   English?: string;
   Japanese?: string;
@@ -9,12 +9,11 @@ export interface Anime {
   slugs?: string[];
   image?: string;
   poster?: string;
-  synopsis?: string;
+  bannerImage?: string | null;
   description?: string;
+  synopsis?: string;
   Type?: string;
   type?: string;
-  Duration?: string;
-  duration?: string;
   Status?: string;
   status?: string;
   Score?: string;
@@ -23,16 +22,22 @@ export interface Anime {
   Aired?: string;
   Broadcast?: string;
   Source?: string;
+  Duration?: string;
+  duration?: string;
   Genres?: string[];
   genres?: string[];
   Episodes?: number;
-  episodes?: number | { slug: string; slugs?: string[]; episodeNumber?: number; title?: string; link?: EpisodeLink; }[];
+  episodes?: number;
   totalSubbed?: number;
   totalDubbed?: number;
+  studios?: string;
   anime_info?: AnimeInfoNested;
   anime_id?: Anime | string;
   link?: EpisodeLink;
   episodeNumber?: number;
+  related?: { id: number; title: string; format: string; image: string }[];
+  recommended?: { id: number; title: string; format: string; image: string; score: number | null; episodes: number | null }[];
+  characters?: { name: string; image: string; role: string; voiceActors: { name: string; image: string; language: string }[] }[];
 }
 
 export interface AnimeInfoNested {

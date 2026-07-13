@@ -1,13 +1,15 @@
 import { NextResponse } from "next/server";
-
-const API_BASE = "https://animedata.cfd/api";
+import { getTrendingAnime, getPopularAnime, getTopAiringAnime } from "@/lib/anilist";
 
 export async function GET() {
   try {
-    const res = await fetch(`${API_BASE}/home`, { next: { revalidate: 300 } });
-    const data = await res.json();
-    return NextResponse.json(data);
+    const [trending, popular, topAiring] = await Promise.all([
+      getTrendingAnime(),
+      getPopularAnime(),
+      getTopAiringAnime(),
+    ]);
+    return NextResponse.json({ trending, popular, topAiring });
   } catch {
-    return NextResponse.json({}, { status: 500 });
+    return NextResponse.json({ trending: [], popular: [], topAiring: [] }, { status: 500 });
   }
 }

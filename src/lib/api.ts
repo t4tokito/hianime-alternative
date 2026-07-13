@@ -1,89 +1,80 @@
-import type { HomeData, EpisodeData, Anime } from './types';
+import type { Anime } from './types';
+import {
+  getTrendingAnime,
+  getPopularAnime,
+  getTopAiringAnime,
+  getRecentlyUpdatedAnime,
+  getUpcomingAnime,
+  searchAnime as anilistSearch,
+  getAnimeById,
+  toAnime,
+  getStreamUrl,
+  type AniListMedia,
+} from './anilist';
 
-const EXTERNAL_API = 'https://animedata.cfd/api';
+// Re-export AniList types
+export { getStreamUrl } from './anilist';
 
-// Server-side fetch (used in server components / API routes)
-async function fetchExternal<T>(endpoint: string, options?: RequestInit): Promise<T> {
-  const res = await fetch(`${EXTERNAL_API}${endpoint}`, {
-    ...options,
-    next: { revalidate: 300 },
-  });
+// ============ Server-side functions (use AniList directly) ============
+
+export async function getHomePage() {
+  const [trending, popular, topAiring, recentlyUpdated, upcoming] = await Promise.all([
+    getTrendingAnime(),
+    getPopularAnime(),
+    getTopAiringAnime(),
+    getRecentlyUpdatedAnime(),
+    getUpcomingAnime(),
+  ]);
+
+  return {
+    trending: trending.map(toAnime),
+    popular: popular.map(toAnime),
+    topAiring: topAiring.map(toAnime),
+    recentlyUpdated: recentlyUpdated.map(toAnime),
+    upcoming: upcoming.map(toAnime),
+  };
+}
+
+export async function searchAnimeExternal(query: string, page = 1): Promise<Anime[]> {
+  const results = await anilistSearch(query, page);
+  return results.media.map(toAnime);
+}
+
+export async function getAnimeDetails(id: number): Promise<Anime | null> {
+  const media = await getAnimeById(id);
+  return media ? toAnime(media) : null;
+}
+
+// ============ Client-side functions (call our proxy routes) ============
+
+export async function searchAnime(query: string): Promise<Anime[]> {
+  const res = await fetch(`/api/search?q=${encodeURIComponent(query)}`);
   if (!res.ok) throw new Error(`API error: ${res.status}`);
   return res.json();
 }
 
-// Server-only functions (used in server components)
-export async function getHomePage(): Promise<HomeData> {
-  return fetchExternal<HomeData>('/home');
-}
-
-export async function searchAnimeExternal(title: string): Promise<Anime[]> {
-  return fetchExternal<Anime[]>('/search', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ title }),
-  });
-}
-
-export async function getPopularAnimeExternal(): Promise<Anime[]> {
-  return fetchExternal<{ animes: Anime[] }>('/anime/popular').then(d => d.animes);
-}
-
-export async function getEpisodeDetailsExternal(slug: string): Promise<EpisodeData> {
-  return fetchExternal<EpisodeData>(`/episode/${slug}`);
-}
-
-export async function getLatestEpisodesExternal(page = 1, limit = 24) {
-  return fetchExternal<{ episodes: Anime[]; currentPage: number; totalPages: number; total: number }>(
-    `/latest/episode?page=${page}&limit=${limit}`
-  );
-}
-
-// Client-side functions (call our /api proxy to avoid CORS)
-export async function searchAnime(title: string): Promise<Anime[]> {
-  const res = await fetch('/api/search', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ title }),
-  });
-  if (!res.ok) throw new Error(`API error: ${res.status}`);
-  return res.json();
-}
-
-export async function getPopularAnime(): Promise<Anime[]> {
+export async function getPopularAnimeClient(): Promise<Anime[]> {
   const res = await fetch('/api/popular');
   if (!res.ok) throw new Error(`API error: ${res.status}`);
-  const data = await res.json();
-  return data.animes || [];
-}
-
-export async function getEpisodeDetails(slug: string): Promise<EpisodeData> {
-  const res = await fetch(`/api/episode?slug=${encodeURIComponent(slug)}`);
-  if (!res.ok) throw new Error(`API error: ${res.status}`);
   return res.json();
 }
 
-export async function getLatestEpisodes(page = 1, limit = 24) {
-  const res = await fetch(`/api/latest-episode?page=${page}&limit=${limit}`);
-  if (!res.ok) throw new Error(`API error: ${res.status}`);
-  return res.json();
-}
+// ============ Utility functions ============
 
-// Shared utility functions
 export function getImageUrl(anime: Anime): string {
-  return anime.image || anime.poster || anime.anime_info?.image || '';
+  return anime.image || anime.poster || '';
 }
 
 export function getTitle(anime: Anime): string {
-  return anime.title || anime.English || '';
+  return anime.English || anime.title || '';
 }
 
 export function getJapaneseTitle(anime: Anime): string {
-  return anime.Japanese || anime.anime_info?.Japanese || '';
+  return anime.Japanese || '';
 }
 
 export function getSlug(anime: Anime): string {
-  return anime.slug || anime.slugs?.[10] || '';
+  return anime.slug || anime._id || '';
 }
 
 export function getEpisodeSlug(episode: Anime): string {
@@ -94,6 +85,6 @@ export function getWatchUrl(slug: string): string {
   return `/watch/${slug}`;
 }
 
-export function getDetailsUrl(slug: string): string {
-  return `/details/${slug}`;
+export function getDetailsUrl(id: string | number): string {
+  return `/details/${id}`;
 }
