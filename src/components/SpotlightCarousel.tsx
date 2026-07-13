@@ -2,10 +2,10 @@
 
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
-import type { FeaturedItem } from "@/lib/types";
-import { getImageUrl, getTitle, getSlug } from "@/lib/api";
+import type { Anime } from "@/lib/types";
+import { getTitle, getImageUrl } from "@/lib/api";
 
-export default function SpotlightCarousel({ items }: { items: FeaturedItem[] }) {
+export default function SpotlightCarousel({ items }: { items: Anime[] }) {
   const [current, setCurrent] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
 
@@ -21,36 +21,26 @@ export default function SpotlightCarousel({ items }: { items: FeaturedItem[] }) 
 
   if (items.length === 0) return null;
 
-  const item = items[current];
-  const anime = item.anime;
-  const id = anime._id || getSlug(anime);
-  const eps = Array.isArray(anime.episodes) ? anime.episodes : [];
-  const watchSlug = eps[0]?.slug || eps[0]?.slugs?.[10];
-  const detailsUrl = id ? `/details/${id}` : `/details/title/${encodeURIComponent(getTitle(anime))}`;
-  const watchUrl = watchSlug ? `/watch/${watchSlug}` : detailsUrl;
+  const anime = items[current];
   const image = getImageUrl(anime);
   const title = getTitle(anime);
-  const jpTitle = anime.Japanese || anime.anime_info?.Japanese || '';
+  const jpTitle = anime.Japanese || '';
 
   return (
     <div
-      className="relative w-full h-[300px] md:h-[420px] lg:h-[480px] overflow-hidden rounded-2xl mx-auto max-w-[1900px]"
+      className="relative w-full h-[300px] md:h-[420px] lg:h-[480px] overflow-hidden rounded-2xl mx-auto"
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
     >
       {items.map((item, i) => {
-        const img = getImageUrl(item.anime);
+        const img = getImageUrl(item);
         return (
           <div
-            key={i}
+            key={item._id || i}
             className={`absolute inset-0 transition-opacity duration-700 ${i === current ? 'opacity-100 spotlight-active' : 'opacity-0'}`}
           >
             {img && (
-              <img
-                src={img}
-                alt={getTitle(item.anime)}
-                className="w-full h-full object-cover"
-              />
+              <img src={img} alt={getTitle(item)} className="w-full h-full object-cover" />
             )}
             <div className="absolute inset-0 bg-gradient-to-r from-black/90 via-black/50 to-transparent" />
             <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent" />
@@ -65,34 +55,24 @@ export default function SpotlightCarousel({ items }: { items: FeaturedItem[] }) 
               #{current + 1} Spotlight
             </span>
             {anime.Type && (
-              <span className="text-xs px-2 py-1 rounded bg-white/10 text-white/80">
-                {anime.Type}
-              </span>
+              <span className="text-xs px-2 py-1 rounded bg-white/10 text-white/80">{anime.Type}</span>
             )}
           </div>
-          <h2 className="text-2xl md:text-4xl lg:text-5xl font-bold text-white mb-2 line-clamp-2">
-            {title}
-          </h2>
-          {jpTitle && (
-            <p className="text-sm text-white/50 mb-3">{jpTitle}</p>
-          )}
-          {anime.synopsis && (
-            <p className="text-sm text-white/70 line-clamp-3 mb-4 hidden md:block">
-              {anime.synopsis}
-            </p>
+          <h2 className="text-2xl md:text-4xl lg:text-5xl font-bold text-white mb-2 line-clamp-2">{title}</h2>
+          {jpTitle && <p className="text-sm text-white/50 mb-3">{jpTitle}</p>}
+          {anime.description && (
+            <p className="text-sm text-white/70 line-clamp-3 mb-4 hidden md:block">{anime.description}</p>
           )}
           <div className="flex items-center gap-3">
             <Link
-              href={watchUrl}
+              href={`/details/${anime._id}`}
               className="inline-flex items-center gap-2 px-6 py-2.5 rounded-lg bg-primary text-white font-medium text-sm hover:bg-primary/90 transition-colors"
             >
-              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M8 5v14l11-7z"/>
-              </svg>
+              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
               Watch Now
             </Link>
             <Link
-              href={detailsUrl}
+              href={`/details/${anime._id}`}
               className="inline-flex items-center gap-2 px-6 py-2.5 rounded-lg bg-white/10 text-white font-medium text-sm hover:bg-white/20 transition-colors backdrop-blur-sm"
             >
               Details
