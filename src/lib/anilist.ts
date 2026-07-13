@@ -15,6 +15,7 @@ async function anilistQuery<T>(query: string, variables?: Record<string, unknown
 
 export interface AniListMedia {
   id: number;
+  idMal: number | null;
   title: { english: string | null; romaji: string | null; native: string | null };
   coverImage: { large: string | null; medium: string | null };
   bannerImage: string | null;
@@ -64,6 +65,7 @@ export interface AniListMedia {
 
 const MEDIA_FIELDS = `
   id
+  idMal
   title { english romaji native }
   coverImage { large medium }
   bannerImage
@@ -266,7 +268,7 @@ export function toAnime(anilist: AniListMedia): {
     Duration: anilist.duration ? `${anilist.duration} min` : "Unknown",
     genres: anilist.genres || [],
     episodes: anilist.episodes || 0,
-    mal_id: null,
+    mal_id: anilist.idMal || null,
     totalSubbed: 0,
     totalDubbed: 0,
     Japanese: anilist.title.native || "",
