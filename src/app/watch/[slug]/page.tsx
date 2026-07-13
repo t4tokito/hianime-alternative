@@ -3,8 +3,64 @@
 import { useState, useEffect, useCallback } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
-import { getEpisodeDetails, getLatestEpisodes } from "@/lib/api";
+import { getEpisodeDetails } from "@/lib/api";
 import type { Anime, EpisodeData } from "@/lib/types";
+
+async function fetchWithRetry(url: string, retries = 2): Promise<Response> {
+  for (let i = 0; i <= retries; i++) {
+    try {
+      const res = await fetch(url);
+      if (res.ok) return res;
+      if (i < retries) await new Promise(r => setTimeout(r, 1000 * (i + 1)));
+    } catch {
+      if (i < retries) await new Promise(r => setTimeout(r, 1000 * (i + 1)));
+    }
+  }
+  throw new Error("Failed after retries");
+}
+
+async function fetchAllEpisodesForAnime(animeIdStr: string): Promise<Anime[]> {
+  const results: Anime[] = [];
+  const seen = new Set<string>();
+
+  // Fetch pages sequentially with delays to avoid rate limiting
+  for (let page = 1; page <= 15; page++) {
+    try {
+      const res = await fetchWithRetry(`/api/latest-episode?page=${page}&limit=100`);
+      const data = await res.json();
+      const episodes = data.episodes || [];
+      if (episodes.length === 0) break;
+
+      for (const ep of episodes) {
+        const epAnimeId = ep.anime_id;
+        let match = false;
+        if (typeof epAnimeId === 'string') {
+          match = epAnimeId === animeIdStr;
+        } else if (typeof epAnimeId === 'object' && epAnimeId !== null) {
+          match = epAnimeId._id === animeIdStr;
+        }
+        if (match && ep.episodeNumber && !seen.has(String(ep.episodeNumber))) {
+          seen.add(String(ep.episodeNumber));
+          const epSlug = ep.slug || ep.slugs?.[0];
+          if (epSlug) {
+            results.push({
+              ...ep,
+              slug: epSlug,
+            });
+          }
+        }
+      }
+
+      // Small delay between pages
+      await new Promise(r => setTimeout(r, 300));
+    } catch {
+      break;
+    }
+  }
+
+  results.sort((a, b) => (a.episodeNumber || 0) - (b.episodeNumber || 0));
+  return results;
+}
 
 export default function WatchPage() {
   const params = useParams();
@@ -22,25 +78,33 @@ export default function WatchPage() {
     setError(false);
     setEpisodeData(null);
     setActiveServer(0);
+    setAnimeEpisodes([]);
 
     getEpisodeDetails(slug)
-      .then((data) => {
+      .then(async (data) => {
         setEpisodeData(data);
         if (data.episode?.link?.dub?.length === 0) setActiveTab("sub");
 
-        // Fetch episodes for THIS specific anime
-        const animeId = data.episode?.anime_id;
-        if (animeId && typeof animeId === 'object' && animeId._id) {
-          getLatestEpisodes(1, 200)
-            .then((epData) => {
-              const filtered = (epData.episodes || []).filter((ep: Anime) => {
-                const epAnime = ep.anime_id;
-                if (epAnime && typeof epAnime === 'object' && (epAnime as Anime)._id === animeId._id) return true;
-                return false;
-              });
-              setAnimeEpisodes(filtered);
-            })
-            .catch(() => {});
+        const animeIdRaw = data.episode?.anime_id;
+        let animeIdStr: string | null = null;
+        if (typeof animeIdRaw === 'object' && animeIdRaw !== null) {
+          animeIdStr = animeIdRaw._id || null;
+        }
+
+        if (animeIdStr) {
+          const eps = await fetchAllEpisodesForAnime(animeIdStr);
+          if (eps.length > 0) {
+            setAnimeEpisodes(eps);
+          } else {
+            // Fallback: show at least the current episode
+            setAnimeEpisodes([{
+              _id: data.episode?.id,
+              title: data.episode?.title || '',
+              episodeNumber: data.episode?.episodeNumber,
+              slug: data.episode?.slug || slug,
+              anime_id: data.episode?.anime_id,
+            }]);
+          }
         }
       })
       .catch(() => setError(true))
@@ -57,7 +121,7 @@ export default function WatchPage() {
 
   const currentIdx = animeEpisodes.findIndex((ep) => ep.slug === slug);
   const prevEp = currentIdx > 0 ? animeEpisodes[currentIdx - 1] : null;
-  const nextEp = currentIdx < animeEpisodes.length - 1 ? animeEpisodes[currentIdx + 1] : null;
+  const nextEp = currentIdx >= 0 && currentIdx < animeEpisodes.length - 1 ? animeEpisodes[currentIdx + 1] : null;
 
   const handleServerChange = useCallback((tab: "sub" | "dub") => {
     setActiveTab(tab);
@@ -66,6 +130,9 @@ export default function WatchPage() {
 
   const detailsSlug = (animeInfo && typeof animeInfo === 'object')
     ? (animeInfo as Anime)._id || ''
+    : '';
+  const animeTitle = (animeInfo && typeof animeInfo === 'object')
+    ? (animeInfo as Anime).title || ''
     : '';
 
   if (loading) {
@@ -93,7 +160,6 @@ export default function WatchPage() {
     <div className="max-w-[1900px] mx-auto px-4 md:px-8 py-6">
       <div className="flex flex-col lg:flex-row gap-6">
         <div className="flex-1 min-w-0">
-          {/* Video Player */}
           {currentUrl ? (
             <div className="relative aspect-video rounded-xl overflow-hidden bg-black border border-border">
               <iframe
@@ -110,18 +176,17 @@ export default function WatchPage() {
             </div>
           )}
 
-          {/* Episode Title + Nav */}
           <div className="mt-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div>
               <h1 className="text-lg font-bold text-foreground">
                 {epTitle || `Episode ${epNumber || ''}`}
               </h1>
-              {animeInfo && typeof animeInfo === 'object' && (
+              {animeTitle && (
                 <Link
                   href={detailsSlug ? `/details/${detailsSlug}` : '#'}
                   className="text-sm text-primary hover:underline"
                 >
-                  {(animeInfo as Anime).title || ''}
+                  {animeTitle}
                 </Link>
               )}
             </div>
@@ -146,17 +211,13 @@ export default function WatchPage() {
           </div>
         </div>
 
-        {/* Sidebar */}
         <div className="w-full lg:w-[380px] flex-shrink-0">
-          {/* Server Selector */}
           <div className="bg-card border border-border rounded-xl overflow-hidden">
             <div className="flex border-b border-border">
               <button
                 onClick={() => handleServerChange("sub")}
                 className={`flex-1 px-4 py-3 text-sm font-medium transition-colors ${
-                  activeTab === "sub"
-                    ? "bg-primary text-white"
-                    : "text-muted hover:text-foreground"
+                  activeTab === "sub" ? "bg-primary text-white" : "text-muted hover:text-foreground"
                 }`}
               >
                 Sub ({links?.sub?.length || 0})
@@ -164,9 +225,7 @@ export default function WatchPage() {
               <button
                 onClick={() => handleServerChange("dub")}
                 className={`flex-1 px-4 py-3 text-sm font-medium transition-colors ${
-                  activeTab === "dub"
-                    ? "bg-primary text-white"
-                    : "text-muted hover:text-foreground"
+                  activeTab === "dub" ? "bg-primary text-white" : "text-muted hover:text-foreground"
                 }`}
               >
                 Dub ({links?.dub?.length || 0})
@@ -196,12 +255,11 @@ export default function WatchPage() {
             </div>
           </div>
 
-          {/* Episode Grid - like hianime.se */}
           {animeEpisodes.length > 0 && (
             <div className="mt-4 bg-card border border-border rounded-xl overflow-hidden">
               <div className="p-3 border-b border-border">
                 <p className="text-sm font-medium text-foreground">
-                  {typeof animeInfo === 'object' && animeInfo ? (animeInfo as Anime).title : 'Episodes'}
+                  {animeTitle || 'Episodes'}
                 </p>
                 <p className="text-xs text-muted">{animeEpisodes.length} episodes</p>
               </div>

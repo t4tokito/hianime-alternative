@@ -93,9 +93,11 @@ export default async function AnimeDetailsPage({
   const totalSub = anime.totalSubbed || 0;
   const totalDub = anime.totalDubbed || 0;
 
-  // Get episodes embedded in the anime object itself
-  const animeEpisodes = Array.isArray(anime.episodes) ? anime.episodes : [];
-  const firstEpSlug = animeEpisodes.length > 0 ? animeEpisodes[animeEpisodes.length - 1]?.slug : null;
+  // Get episodes embedded in the anime object itself, sorted by episode number
+  const animeEpisodes = Array.isArray(anime.episodes)
+    ? [...anime.episodes].sort((a, b) => (a.episodeNumber || 0) - (b.episodeNumber || 0))
+    : [];
+  const firstEpSlug = animeEpisodes.length > 0 ? animeEpisodes[0]?.slug : null;
 
   // Also try latest episodes from the API
   let latestEpisodes: Anime[] = [];
