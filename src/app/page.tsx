@@ -11,11 +11,11 @@ export default async function HomePage() {
   let data;
   try {
     const [trendingRaw, popularRaw, topAiringRaw, recentlyUpdatedRaw, upcomingRaw] = await Promise.all([
-      getTrendingAnime(),
-      getPopularAnime(),
-      getTopAiringAnime(),
-      getRecentlyUpdatedAnime(),
-      getUpcomingAnime(),
+      getTrendingAnime().catch(() => []),
+      getPopularAnime().catch(() => []),
+      getTopAiringAnime().catch(() => []),
+      getRecentlyUpdatedAnime().catch(() => []),
+      getUpcomingAnime().catch(() => []),
     ]);
     data = {
       trending: trendingRaw.map(toAnime),
@@ -24,7 +24,8 @@ export default async function HomePage() {
       recentlyUpdated: recentlyUpdatedRaw.map(toAnime),
       upcoming: upcomingRaw.map(toAnime),
     };
-  } catch {
+  } catch (e) {
+    console.error("Home page error:", e);
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
         <div className="text-center">
