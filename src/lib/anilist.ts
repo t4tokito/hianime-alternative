@@ -5,7 +5,7 @@ async function anilistQuery<T>(query: string, variables?: Record<string, unknown
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ query, variables }),
-    next: { revalidate: 300 },
+    cache: "no-store",
   });
   if (!res.ok) throw new Error(`AniList error: ${res.status}`);
   const json = await res.json();
