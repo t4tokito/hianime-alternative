@@ -33,7 +33,7 @@ export default function WatchPage() {
   };
 
   const { anilistId, epNum } = parseSlug(slug);
-  useEffect(() => { setCurrentEp(epNum); }, [epNum]);
+  useEffect(() => { setCurrentEp(epNum); setStreamError(false); }, [epNum]);
 
   useEffect(() => {
     if (!anilistId) {
@@ -55,15 +55,27 @@ export default function WatchPage() {
       .finally(() => setLoading(false));
   }, [anilistId]);
 
+  const [streamError, setStreamError] = useState(false);
+
   const malId = anime?.mal_id;
   const totalEps = anime?.episodes || 0;
   const streamUrl = malId
     ? `${STREAM_SERVERS[activeServer].base}/${malId}/${currentEp}/${activeTab}`
     : '';
 
+  const handleStreamError = useCallback(() => {
+    // Try next server if current one fails
+    if (activeServer < STREAM_SERVERS.length - 1) {
+      setActiveServer(activeServer + 1);
+    } else {
+      setStreamError(true);
+    }
+  }, [activeServer]);
+
   const handleServerChange = useCallback((tab: "sub" | "dub") => {
     setActiveTab(tab);
     setActiveServer(0);
+    setStreamError(false);
   }, []);
 
   const getWatchUrl = (ep: number) => {
@@ -98,19 +110,29 @@ export default function WatchPage() {
       <div className="flex flex-col lg:flex-row gap-6">
         <div className="flex-1 min-w-0">
           {/* Video Player */}
-          {streamUrl ? (
+          {streamUrl && !streamError ? (
             <div className="relative aspect-video rounded-xl overflow-hidden bg-black border border-border">
               <iframe
+                key={`${malId}-${currentEp}-${activeTab}-${activeServer}`}
                 src={streamUrl}
                 className="w-full h-full"
                 allowFullScreen
                 allow="autoplay; fullscreen; picture-in-picture; encrypted-media"
                 referrerPolicy="no-referrer"
+                onError={handleStreamError}
               />
             </div>
           ) : (
-            <div className="aspect-video rounded-xl bg-card border border-border flex items-center justify-center">
-              <p className="text-muted">No stream available{!malId ? " (MAL ID not found)" : ""}</p>
+            <div className="aspect-video rounded-xl bg-card border border-border flex flex-col items-center justify-center gap-3">
+              <svg className="w-16 h-16 text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+              </svg>
+              <p className="text-foreground font-medium">Stream not available</p>
+              <p className="text-muted text-sm text-center max-w-md">
+                This episode is not available on our streaming servers yet.
+                Try other episodes or check back later.
+              </p>
+              {!malId && <p className="text-muted text-xs">MAL ID not found for this anime</p>}
             </div>
           )}
 
