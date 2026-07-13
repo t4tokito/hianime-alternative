@@ -20,6 +20,9 @@ export default function WatchPage() {
   const [activeTab, setActiveTab] = useState<"sub" | "dub">("sub");
   const [activeServer, setActiveServer] = useState(0);
   const [currentEp, setCurrentEp] = useState(1);
+  const [streamError, setStreamError] = useState(false);
+  const [fallbackUrl, setFallbackUrl] = useState<string | null>(null);
+  const [tryingFallback, setTryingFallback] = useState(false);
 
   // Parse slug to get anime ID and episode number
   // Pattern: "anilist-{id}-episode-{num}" or "{id}-episode-{num}"
@@ -33,7 +36,7 @@ export default function WatchPage() {
   };
 
   const { anilistId, epNum } = parseSlug(slug);
-  useEffect(() => { setCurrentEp(epNum); setStreamError(false); }, [epNum]);
+  useEffect(() => { setCurrentEp(epNum); setStreamError(false); setFallbackUrl(null); setTryingFallback(false); }, [epNum]);
 
   useEffect(() => {
     if (!anilistId) {
@@ -55,27 +58,50 @@ export default function WatchPage() {
       .finally(() => setLoading(false));
   }, [anilistId]);
 
-  const [streamError, setStreamError] = useState(false);
-
   const malId = anime?.mal_id;
   const totalEps = anime?.episodes || 0;
-  const streamUrl = malId
+
+  // Build stream URL: try direct servers first, then fallback
+  const directUrl = malId
     ? `${STREAM_SERVERS[activeServer].base}/${malId}/${currentEp}/${activeTab}`
     : '';
+  const streamUrl = fallbackUrl || directUrl;
 
   const handleStreamError = useCallback(() => {
-    // Try next server if current one fails
+    if (tryingFallback) return; // Don't loop
+    // Try next direct server
     if (activeServer < STREAM_SERVERS.length - 1) {
       setActiveServer(activeServer + 1);
+    } else if (!fallbackUrl && malId) {
+      // All direct servers failed, try animedata.cfd fallback
+      setTryingFallback(true);
+      fetch(`/api/fallback-stream?malId=${malId}&episode=${currentEp}&type=${activeTab}`)
+        .then((res) => res.json())
+        .then((data) => {
+          if (data?.episode?.link) {
+            const links = activeTab === "dub" ? data.episode.link.dub : data.episode.link.sub;
+            if (links?.length > 0) {
+              setFallbackUrl(links[0]);
+            } else {
+              setStreamError(true);
+            }
+          } else {
+            setStreamError(true);
+          }
+        })
+        .catch(() => setStreamError(true))
+        .finally(() => setTryingFallback(false));
     } else {
       setStreamError(true);
     }
-  }, [activeServer]);
+  }, [activeServer, fallbackUrl, malId, currentEp, activeTab, tryingFallback]);
 
   const handleServerChange = useCallback((tab: "sub" | "dub") => {
     setActiveTab(tab);
     setActiveServer(0);
     setStreamError(false);
+    setFallbackUrl(null);
+    setTryingFallback(false);
   }, []);
 
   const getWatchUrl = (ep: number) => {
