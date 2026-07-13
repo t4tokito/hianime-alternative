@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { searchAnime } from "@/lib/anilist";
+import { searchAnime, toAnime } from "@/lib/anilist";
 
 export async function GET(request: NextRequest) {
   const q = request.nextUrl.searchParams.get("q");
@@ -7,7 +7,7 @@ export async function GET(request: NextRequest) {
 
   try {
     const results = await searchAnime(q);
-    return NextResponse.json(results.media);
+    return NextResponse.json(results.media.map(toAnime));
   } catch (e) {
     console.error("Search API error:", e);
     return NextResponse.json([], { status: 500 });

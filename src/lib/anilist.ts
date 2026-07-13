@@ -30,11 +30,9 @@ export interface AniListMedia {
   startDate: { year: number | null; month: number | null; day: number | null };
   NextAiringEpisode: { episode: number; airingAt: number } | null;
   characters: {
-    nodes: {
-      id: number;
-      name: { full: string };
-      image: { large: string | null };
+    edges: {
       role: string;
+      node: { id: number; name: { full: string }; image: { large: string | null } };
       voiceActors: {
         id: number;
         name: { full: string };
@@ -81,12 +79,14 @@ const MEDIA_FIELDS = `
   startDate { year month day }
   NextAiringEpisode: nextAiringEpisode { episode airingAt }
   characters(perPage: 10, sort: ROLE) {
-    nodes {
-      id
-      name { full }
-      image { large }
+    edges {
       role
-      voiceActors(sort: LANGUAGE, limit: 2) {
+      node {
+        id
+        name { full }
+        image { large }
+      }
+      voiceActors(language: JAPANESE, sort: LANGUAGE) {
         id
         name { full }
         image { large }
@@ -289,11 +289,11 @@ export function toAnime(anilist: AniListMedia): {
       score: n.mediaRecommendation.averageScore,
       episodes: n.mediaRecommendation.episodes,
     })) || [],
-    characters: anilist.characters?.nodes?.map((c) => ({
-      name: c.name.full,
-      image: c.image?.large || "",
-      role: c.role,
-      voiceActors: c.voiceActors?.map((va) => ({
+    characters: anilist.characters?.edges?.map((e) => ({
+      name: e.node.name.full,
+      image: e.node.image?.large || "",
+      role: e.role,
+      voiceActors: e.voiceActors?.map((va) => ({
         name: va.name.full,
         image: va.image?.large || "",
         language: va.language,
