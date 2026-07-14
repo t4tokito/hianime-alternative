@@ -41,21 +41,22 @@ export default function SpotlightCarousel({ items }: { items: Anime[] }) {
           >
             {/* Dark background base */}
             <div className="absolute inset-0 bg-background" />
-            {/* Image - fills right side at natural height */}
+            {/* Image with left-edge fade mask */}
             {img && (
               <img
                 src={img}
                 alt={getTitle(item)}
                 className="absolute right-0 top-0 h-full object-cover"
-                style={{ width: '55%', objectPosition: 'center top' }}
+                style={{
+                  width: '65%',
+                  objectPosition: 'center top',
+                  maskImage: 'linear-gradient(to right, transparent 0%, transparent 10%, black 50%)',
+                  WebkitMaskImage: 'linear-gradient(to right, transparent 0%, transparent 10%, black 50%)',
+                }}
               />
             )}
-            {/* Gradient: smooth fade from background color on left into the image */}
-            <div className="absolute inset-0" style={{
-              background: 'linear-gradient(to right, #0f0f17 0%, #0f0f17 15%, rgba(15,15,23,0.8) 35%, rgba(15,15,23,0.4) 55%, transparent 80%)'
-            }} />
             {/* Bottom fade for text readability */}
-            <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent opacity-80" />
+            <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent opacity-60" />
           </div>
         );
       })}
