@@ -33,15 +33,14 @@ export default function SpotlightCarousel({ items }: { items: Anime[] }) {
       onMouseLeave={() => setIsPaused(false)}
     >
       {items.map((item, i) => {
-        // Use bannerImage for spotlight (wide high-quality), fallback to cover
-        const img = item.bannerImage || getImageUrl(item);
+        const img = getImageUrl(item);
         return (
           <div
             key={item._id || i}
             className={`absolute inset-0 transition-opacity duration-700 ${i === current ? 'opacity-100 spotlight-active' : 'opacity-0'}`}
           >
             {img && (
-              <img src={img} alt={getTitle(item)} className="w-full h-full object-cover" />
+              <img src={img} alt={getTitle(item)} className="absolute inset-0 h-full w-auto min-w-full object-cover object-right" />
             )}
             <div className="absolute inset-0 bg-gradient-to-r from-black/90 via-black/50 to-transparent" />
             <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent" />
