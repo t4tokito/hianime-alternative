@@ -39,21 +39,23 @@ export default function SpotlightCarousel({ items }: { items: Anime[] }) {
             key={item._id || i}
             className={`absolute inset-0 transition-opacity duration-700 ${i === current ? 'opacity-100 spotlight-active' : 'opacity-0'}`}
           >
+            {/* Dark background base */}
+            <div className="absolute inset-0 bg-background" />
+            {/* Image - fills right side at natural height */}
             {img && (
-              <>
-                <img
-                  src={img}
-                  alt={getTitle(item)}
-                  className="absolute right-0 top-0 h-full w-auto max-w-[60%] object-contain object-right"
-                />
-                {/* Gradient fade from background color on left to transparent on right */}
-                <div className="absolute inset-0 bg-gradient-to-r from-background via-background/70 to-transparent w-[70%]" />
-                {/* Bottom fade */}
-                <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent" />
-              </>
+              <img
+                src={img}
+                alt={getTitle(item)}
+                className="absolute right-0 top-0 h-full object-cover"
+                style={{ width: '55%', objectPosition: 'center top' }}
+              />
             )}
-            <div className="absolute inset-0 bg-gradient-to-r from-black/90 via-black/50 to-transparent" />
-            <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent" />
+            {/* Gradient: smooth fade from background color on left into the image */}
+            <div className="absolute inset-0" style={{
+              background: 'linear-gradient(to right, #0f0f17 0%, #0f0f17 25%, rgba(15,15,23,0.7) 50%, transparent 75%)'
+            }} />
+            {/* Bottom fade for text readability */}
+            <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent opacity-80" />
           </div>
         );
       })}
