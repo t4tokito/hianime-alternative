@@ -69,7 +69,7 @@ export default function Navbar() {
           </span>
         </Link>
 
-        <div ref={searchRef} className="relative w-full md:w-[350px] lg:w-[450px]">
+        <div ref={searchRef} className="relative w-full md:w-[350px] lg:w-[450px] px-4 md:px-0">
           <form onSubmit={handleSubmit} className="relative">
             <input
               type="text"

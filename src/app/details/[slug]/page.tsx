@@ -69,16 +69,17 @@ export default async function AnimeDetailsPage({
 
   return (
     <div className="max-w-[1900px] mx-auto px-4 md:px-8 py-6">
-      {/* Banner */}
+      {/* Banner - hidden on mobile */}
       {anime.bannerImage && (
-        <div className="relative w-full h-[200px] md:h-[300px] rounded-xl overflow-hidden mb-6">
+        <div className="hidden md:block relative w-full h-[200px] lg:h-[300px] rounded-xl overflow-hidden mb-6">
           <img src={anime.bannerImage} alt="" className="w-full h-full object-cover" />
           <div className="absolute inset-0 bg-gradient-to-t from-background via-background/50 to-transparent" />
         </div>
       )}
 
-      <div className="flex flex-col md:flex-row gap-6 md:gap-10">
-        <div className="w-full md:w-[300px] lg:w-[350px] flex-shrink-0">
+      <div className="flex flex-col md:flex-row gap-4 md:gap-10">
+        {/* Cover - smaller on mobile */}
+        <div className="w-[45%] md:w-[300px] lg:w-[350px] flex-shrink-0 mx-auto md:mx-0">
           <div className="relative aspect-[3/4] rounded-xl overflow-hidden bg-card border border-border">
             {image ? (
               <img src={image} alt={title} className="w-full h-full object-cover" />
