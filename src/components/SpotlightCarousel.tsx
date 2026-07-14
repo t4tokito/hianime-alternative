@@ -52,7 +52,7 @@ export default function SpotlightCarousel({ items }: { items: Anime[] }) {
             )}
             {/* Gradient: smooth fade from background color on left into the image */}
             <div className="absolute inset-0" style={{
-              background: 'linear-gradient(to right, #0f0f17 0%, #0f0f17 25%, rgba(15,15,23,0.7) 50%, transparent 75%)'
+              background: 'linear-gradient(to right, #0f0f17 0%, #0f0f17 15%, rgba(15,15,23,0.8) 35%, rgba(15,15,23,0.4) 55%, transparent 80%)'
             }} />
             {/* Bottom fade for text readability */}
             <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent opacity-80" />
