@@ -33,7 +33,8 @@ export default function SpotlightCarousel({ items }: { items: Anime[] }) {
       onMouseLeave={() => setIsPaused(false)}
     >
       {items.map((item, i) => {
-        const img = getImageUrl(item);
+        // Use bannerImage for spotlight (wide high-quality), fallback to cover
+        const img = item.bannerImage || getImageUrl(item);
         return (
           <div
             key={item._id || i}
