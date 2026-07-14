@@ -71,10 +71,10 @@ export default function SpotlightCarousel({ items }: { items: Anime[] }) {
               <span className="text-xs px-2 py-1 rounded bg-white/10 text-white/80">{anime.Type}</span>
             )}
           </div>
-          <h2 className="text-2xl md:text-4xl lg:text-5xl font-bold text-white mb-2 line-clamp-2">{title}</h2>
-          {jpTitle && <p className="text-sm text-white/50 mb-3">{jpTitle}</p>}
+          <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold text-white mb-2 line-clamp-1">{title}</h2>
+          {jpTitle && <p className="text-sm text-white/50 mb-2 line-clamp-1">{jpTitle}</p>}
           {anime.description && (
-            <p className="text-sm text-white/70 line-clamp-3 mb-4 hidden md:block">{anime.description}</p>
+            <p className="text-sm text-white/70 line-clamp-2 mb-4 hidden md:block">{anime.description}</p>
           )}
           <div className="flex items-center gap-3">
             <Link
