@@ -16,13 +16,17 @@ export default function Navbar() {
   const debounceRef = useRef<NodeJS.Timeout>(null);
 
   useEffect(() => {
-    function handleClickOutside(e: MouseEvent) {
+    function handleInteraction(e: MouseEvent | TouchEvent) {
       if (searchRef.current && !searchRef.current.contains(e.target as Node)) {
         setShowSuggestions(false);
       }
     }
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
+    document.addEventListener("mousedown", handleInteraction);
+    document.addEventListener("touchstart", handleInteraction);
+    return () => {
+      document.removeEventListener("mousedown", handleInteraction);
+      document.removeEventListener("touchstart", handleInteraction);
+    };
   }, []);
 
   const handleSearch = (value: string) => {
