@@ -65,7 +65,7 @@ export default function Navbar() {
             </svg>
           </div>
           <span className="text-xl font-bold text-foreground hidden sm:block">
-            Hi<span className="text-primary">Anime</span>
+            Tokito<span className="text-primary">TV</span>
           </span>
         </Link>
 

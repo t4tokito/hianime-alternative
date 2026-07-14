@@ -3,8 +3,8 @@ import "./globals.css";
 import Navbar from "@/components/Navbar";
 
 export const metadata: Metadata = {
-  title: "Hianime - Watch Anime Online Free",
-  description: "Watch anime online for free. Stream the latest subbed and dubbed anime episodes.",
+  title: "TokitoTV - Watch Anime Online Free",
+  description: "Watch anime online for free. Stream the latest subbed and dubbed anime episodes without ads.",
 };
 
 export default function RootLayout({
@@ -18,7 +18,7 @@ export default function RootLayout({
         <Navbar />
         <main className="flex-1 pt-16">{children}</main>
         <footer className="border-t border-border py-8 text-center text-muted text-sm">
-          <p>Hianime does not store any files on our server.</p>
+          <p>TokitoTV does not store any files on our server.</p>
           <p className="mt-1">We only link to media hosted on 3rd party services.</p>
         </footer>
       </body>
