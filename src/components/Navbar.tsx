@@ -70,36 +70,24 @@ export default function Navbar() {
         </Link>
 
         <div ref={searchRef} className="relative w-full md:w-[350px] lg:w-[450px] px-4 md:px-0">
-          <div className="relative">
+          <div className="flex items-center gap-2">
             <input
               type="text"
               value={query}
               onChange={(e) => handleSearch(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" && query.trim()) {
-                  e.preventDefault();
-                  router.push(`/search?q=${encodeURIComponent(query.trim())}`);
-                  setShowSuggestions(false);
-                  (e.target as HTMLInputElement).blur();
-                }
-              }}
-              onFocus={() => suggestions.length > 0 && setShowSuggestions(true)}
               placeholder="Search anime..."
-              className="w-full h-10 px-4 pr-10 bg-card border border-border rounded-lg text-foreground placeholder-muted focus:outline-none focus:border-primary transition-colors"
+              className="flex-1 h-10 px-4 bg-card border border-border rounded-lg text-foreground placeholder-muted focus:outline-none focus:border-primary transition-colors"
             />
             <button
               type="button"
               onClick={() => {
                 if (query.trim()) {
-                  router.push(`/search?q=${encodeURIComponent(query.trim())}`);
-                  setShowSuggestions(false);
+                  window.location.href = `/search?q=${encodeURIComponent(query.trim())}`;
                 }
               }}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted hover:text-foreground"
+              className="h-10 px-4 bg-primary text-white rounded-lg font-medium text-sm hover:bg-primary/90 transition-colors flex-shrink-0"
             >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-              </svg>
+              Search
             </button>
           </div>
 
