@@ -28,7 +28,7 @@ export default function SpotlightCarousel({ items }: { items: Anime[] }) {
 
   return (
     <div
-      className="relative w-full h-[300px] md:h-[420px] lg:h-[480px] overflow-hidden rounded-2xl mx-auto"
+      className="relative w-[98%] h-[350px] md:h-[480px] lg:h-[540px] overflow-hidden rounded-2xl mx-auto"
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
     >
