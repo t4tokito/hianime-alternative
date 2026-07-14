@@ -46,9 +46,8 @@ export default function SpotlightCarousel({ items }: { items: Anime[] }) {
               <img
                 src={img}
                 alt={getTitle(item)}
-                className="absolute right-0 top-0 h-full object-cover"
+                className="absolute right-0 top-0 h-full object-cover w-[90%] md:w-[55%]"
                 style={{
-                  width: '55%',
                   objectPosition: 'center top',
                   maskImage: 'linear-gradient(to right, transparent 0%, transparent 10%, black 50%)',
                   WebkitMaskImage: 'linear-gradient(to right, transparent 0%, transparent 10%, black 50%)',
