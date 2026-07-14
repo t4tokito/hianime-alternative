@@ -62,7 +62,7 @@ export default function SpotlightCarousel({ items }: { items: Anime[] }) {
       })}
 
       <div className="absolute inset-0 flex items-end md:items-center px-6 md:px-12 lg:px-16 pb-8 md:pb-0 z-10">
-        <div className="max-w-xl">
+        <div className="max-w-xl overflow-hidden">
           <div className="flex items-center gap-2 mb-3">
             <span className="text-xs font-bold px-2 py-1 rounded bg-primary text-white">
               #{current + 1} Spotlight
@@ -71,10 +71,10 @@ export default function SpotlightCarousel({ items }: { items: Anime[] }) {
               <span className="text-xs px-2 py-1 rounded bg-white/10 text-white/80">{anime.Type}</span>
             )}
           </div>
-          <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold text-white mb-2 line-clamp-1">{title}</h2>
-          {jpTitle && <p className="text-sm text-white/50 mb-2 line-clamp-1">{jpTitle}</p>}
+          <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold text-white mb-2 overflow-hidden" style={{ display: '-webkit-box', WebkitLineClamp: 1, WebkitBoxOrient: 'vertical' }}>{title}</h2>
+          {jpTitle && <p className="text-sm text-white/50 mb-2 overflow-hidden" style={{ display: '-webkit-box', WebkitLineClamp: 1, WebkitBoxOrient: 'vertical' }}>{jpTitle}</p>}
           {anime.description && (
-            <p className="text-sm text-white/70 line-clamp-2 mb-4 hidden md:block">{anime.description}</p>
+            <p className="text-sm text-white/70 mb-4 hidden md:block overflow-hidden" style={{ display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>{anime.description}</p>
           )}
           <div className="flex items-center gap-3">
             <Link
