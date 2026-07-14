@@ -74,21 +74,31 @@ export default function Navbar() {
             <input
               type="text"
               value={query}
-              onChange={(e) => handleSearch(e.target.value)}
+              onChange={(e) => {
+                setQuery(e.target.value);
+                if (debounceRef.current) clearTimeout(debounceRef.current);
+                if (e.target.value.trim().length < 2) {
+                  setSuggestions([]);
+                  setShowSuggestions(false);
+                  return;
+                }
+                debounceRef.current = setTimeout(async () => {
+                  try {
+                    const results = await searchAnime(e.target.value.trim());
+                    setSuggestions(results.slice(0, 8));
+                    setShowSuggestions(true);
+                  } catch { setSuggestions([]); }
+                }, 400);
+              }}
               placeholder="Search anime..."
               className="flex-1 h-10 px-4 bg-card border border-border rounded-lg text-foreground placeholder-muted focus:outline-none focus:border-primary transition-colors"
             />
-            <button
-              type="button"
-              onClick={() => {
-                if (query.trim()) {
-                  window.location.href = `/search?q=${encodeURIComponent(query.trim())}`;
-                }
-              }}
-              className="h-10 px-4 bg-primary text-white rounded-lg font-medium text-sm hover:bg-primary/90 transition-colors flex-shrink-0"
+            <Link
+              href={`/search?q=${encodeURIComponent(query || 'all')}`}
+              className="h-10 px-4 bg-primary text-white rounded-lg font-medium text-sm hover:bg-primary/90 transition-colors flex items-center flex-shrink-0"
             >
               Search
-            </button>
+            </Link>
           </div>
 
           {showSuggestions && suggestions.length > 0 && (
