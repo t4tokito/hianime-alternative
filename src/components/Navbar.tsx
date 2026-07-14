@@ -111,12 +111,6 @@ export default function Navbar() {
         </div>
 
         <div className="flex items-center gap-4">
-          <Link href="/search" className="text-sm text-muted hover:text-foreground transition-colors hidden md:block">
-            Browse
-          </Link>
-          <Link href="/schedule" className="text-sm text-muted hover:text-foreground transition-colors hidden md:block">
-            Schedule
-          </Link>
         </div>
       </div>
     </nav>
