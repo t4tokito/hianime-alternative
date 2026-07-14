@@ -71,7 +71,7 @@ export default async function AnimeDetailsPage({
     <div className="max-w-[1900px] mx-auto px-4 md:px-8 py-6">
       {/* Banner - full width on mobile, hidden on desktop */}
       {anime.bannerImage && (
-        <div className="block md:hidden relative w-full h-[200px] rounded-xl overflow-hidden mb-4">
+        <div className="block relative w-full h-[200px] md:h-[250px] lg:h-[300px] rounded-xl overflow-hidden mb-4 md:mb-6">
           <img src={anime.bannerImage} alt="" className="w-full h-full object-cover object-center" />
           <div className="absolute inset-0 bg-gradient-to-t from-background via-background/50 to-transparent" />
         </div>
