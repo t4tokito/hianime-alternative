@@ -70,7 +70,7 @@ export default function Navbar() {
         </Link>
 
         <div ref={searchRef} className="relative flex-1 max-w-[500px]">
-          <div className="relative flex items-center">
+          <div className="relative flex items-center gap-2">
             <input
               ref={inputRef}
               type="text"
@@ -85,16 +85,17 @@ export default function Navbar() {
               }}
               onFocus={() => suggestions.length > 0 && setShowSuggestions(true)}
               placeholder="Search anime..."
-              className="w-full h-10 px-4 pr-10 bg-card border border-border rounded-lg text-foreground placeholder-muted focus:outline-none focus:border-primary transition-colors"
+              className="flex-1 h-10 px-4 bg-card border border-border rounded-lg text-foreground placeholder-muted focus:outline-none focus:border-primary transition-colors"
             />
             <button
               type="button"
               onClick={doSearch}
-              className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 rounded-md hover:bg-card-hover transition-colors"
+              className="h-10 px-3 md:px-2 bg-primary text-white rounded-lg font-medium text-sm hover:bg-primary/90 transition-colors flex items-center gap-1.5 flex-shrink-0"
             >
-              <svg className="w-4 h-4 text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
               </svg>
+              <span className="hidden sm:inline">Search</span>
             </button>
           </div>
 
