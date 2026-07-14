@@ -14,6 +14,7 @@ export default function Navbar() {
   const [loading, setLoading] = useState(false);
   const searchRef = useRef<HTMLDivElement>(null);
   const debounceRef = useRef<NodeJS.Timeout>(null);
+  const queryRef = useRef("");
 
   useEffect(() => {
     function handleInteraction(e: MouseEvent | TouchEvent) {
@@ -76,6 +77,7 @@ export default function Navbar() {
               value={query}
               onChange={(e) => {
                 setQuery(e.target.value);
+                queryRef.current = e.target.value;
                 if (debounceRef.current) clearTimeout(debounceRef.current);
                 if (e.target.value.trim().length < 2) {
                   setSuggestions([]);
@@ -94,8 +96,15 @@ export default function Navbar() {
               className="flex-1 h-10 px-4 bg-card border border-border rounded-lg text-foreground placeholder-muted focus:outline-none focus:border-primary transition-colors"
             />
             <Link
-              href={`/search?q=${encodeURIComponent(query || 'all')}`}
+              href={`/search?q=${encodeURIComponent(queryRef.current)}`}
+              onClick={(e) => {
+                if (!queryRef.current.trim()) {
+                  e.preventDefault();
+                  return;
+                }
+              }}
               className="h-10 px-4 bg-primary text-white rounded-lg font-medium text-sm hover:bg-primary/90 transition-colors flex items-center flex-shrink-0"
+              prefetch={false}
             >
               Search
             </Link>
