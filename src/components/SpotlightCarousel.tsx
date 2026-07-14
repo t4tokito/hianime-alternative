@@ -40,11 +40,17 @@ export default function SpotlightCarousel({ items }: { items: Anime[] }) {
             className={`absolute inset-0 transition-opacity duration-700 ${i === current ? 'opacity-100 spotlight-active' : 'opacity-0'}`}
           >
             {img && (
-              <img
-                src={img}
-                alt={getTitle(item)}
-                className="absolute right-0 top-0 h-full w-auto max-w-[60%] object-contain object-right"
-              />
+              <>
+                <img
+                  src={img}
+                  alt={getTitle(item)}
+                  className="absolute right-0 top-0 h-full w-auto max-w-[60%] object-contain object-right"
+                />
+                {/* Gradient fade from background color on left to transparent on right */}
+                <div className="absolute inset-0 bg-gradient-to-r from-background via-background/70 to-transparent w-[70%]" />
+                {/* Bottom fade */}
+                <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent" />
+              </>
             )}
             <div className="absolute inset-0 bg-gradient-to-r from-black/90 via-black/50 to-transparent" />
             <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent" />
