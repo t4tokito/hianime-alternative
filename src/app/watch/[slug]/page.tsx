@@ -23,6 +23,7 @@ export default function WatchPage() {
   const [streamError, setStreamError] = useState(false);
   const [fallbackUrl, setFallbackUrl] = useState<string | null>(null);
   const [tryingFallback, setTryingFallback] = useState(false);
+  const [iframeActive, setIframeActive] = useState(false);
 
   // Parse slug to get anime ID and episode number
   // Pattern: "anilist-{id}-episode-{num}" or "{id}-episode-{num}"
@@ -36,7 +37,7 @@ export default function WatchPage() {
   };
 
   const { anilistId, epNum } = parseSlug(slug);
-  useEffect(() => { setCurrentEp(epNum); setStreamError(false); setFallbackUrl(null); setTryingFallback(false); }, [epNum]);
+  useEffect(() => { setCurrentEp(epNum); setStreamError(false); setFallbackUrl(null); setTryingFallback(false); setIframeActive(false); }, [epNum]);
 
   useEffect(() => {
     if (!anilistId) {
@@ -137,16 +138,29 @@ export default function WatchPage() {
         <div className="flex-1 min-w-0">
           {/* Video Player */}
           {streamUrl && !streamError ? (
-            <div className="relative aspect-video rounded-xl overflow-hidden bg-black border border-border">
+            <div
+              className="relative aspect-video rounded-xl overflow-hidden bg-black border border-border"
+              onClick={() => setIframeActive(true)}
+            >
               <iframe
                 key={`${malId}-${currentEp}-${activeTab}-${activeServer}`}
                 src={streamUrl}
                 className="w-full h-full"
+                style={{ pointerEvents: iframeActive ? 'auto' : 'none' }}
                 allowFullScreen
                 allow="autoplay; fullscreen; picture-in-picture; encrypted-media"
                 referrerPolicy="no-referrer"
                 onError={handleStreamError}
               />
+              {!iframeActive && (
+                <div className="absolute inset-0 flex items-center justify-center bg-black/50 cursor-pointer z-10">
+                  <div className="w-16 h-16 rounded-full bg-primary/90 flex items-center justify-center shadow-lg hover:bg-primary transition-colors">
+                    <svg className="w-7 h-7 text-white ml-1" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M8 5v14l11-7z"/>
+                    </svg>
+                  </div>
+                </div>
+              )}
             </div>
           ) : (
             <div className="aspect-video rounded-xl bg-card border border-border flex flex-col items-center justify-center gap-3">
