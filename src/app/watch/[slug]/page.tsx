@@ -23,7 +23,6 @@ export default function WatchPage() {
   const [streamError, setStreamError] = useState(false);
   const [fallbackUrl, setFallbackUrl] = useState<string | null>(null);
   const [tryingFallback, setTryingFallback] = useState(false);
-  const [iframeActive, setIframeActive] = useState(false);
 
   // Parse slug to get anime ID and episode number
   // Pattern: "anilist-{id}-episode-{num}" or "{id}-episode-{num}"
@@ -37,7 +36,7 @@ export default function WatchPage() {
   };
 
   const { anilistId, epNum } = parseSlug(slug);
-  useEffect(() => { setCurrentEp(epNum); setStreamError(false); setFallbackUrl(null); setTryingFallback(false); setIframeActive(false); }, [epNum]);
+  useEffect(() => { setCurrentEp(epNum); setStreamError(false); setFallbackUrl(null); setTryingFallback(false); }, [epNum]);
 
   useEffect(() => {
     if (!anilistId) {
@@ -138,43 +137,121 @@ export default function WatchPage() {
         <div className="flex-1 min-w-0">
           {/* Video Player */}
           {streamUrl && !streamError ? (
-            <div
-              className="relative aspect-video rounded-xl overflow-hidden bg-black border border-border"
-              onClick={() => {
-                if (!iframeActive) {
-                  setIframeActive(true);
-                  // Auto-lock after 15 seconds to prevent ad redirects
-                  setTimeout(() => setIframeActive(false), 15000);
-                }
-              }}
-            >
+            <div className="relative aspect-video rounded-xl overflow-hidden bg-black border border-border group">
+              {/* iframe - completely blocked from interaction */}
               <iframe
                 key={`${malId}-${currentEp}-${activeTab}-${activeServer}`}
                 src={streamUrl}
                 className="w-full h-full"
-                style={{ pointerEvents: iframeActive ? 'auto' : 'none' }}
+                style={{ pointerEvents: 'none' }}
                 allowFullScreen
                 allow="autoplay; fullscreen; picture-in-picture; encrypted-media"
                 referrerPolicy="no-referrer"
                 onError={handleStreamError}
               />
-              {!iframeActive && (
-                <div className="absolute inset-0 flex flex-col items-center justify-end pb-8 bg-black/30 z-10 pointer-events-none">
-                  <p className="text-white/60 text-sm bg-black/50 px-4 py-2 rounded-full backdrop-blur-sm">
-                    Tap to interact with player
-                  </p>
+
+              {/* Custom Controls Overlay */}
+              <div className="absolute inset-0 z-20 flex flex-col justify-end">
+                {/* Gradient background for controls */}
+                <div className="bg-gradient-to-t from-black/90 via-black/40 to-transparent pt-20 pb-3 px-4">
+                  {/* Progress bar placeholder */}
+                  <div className="w-full h-1 bg-white/20 rounded-full mb-3 cursor-pointer">
+                    <div className="h-full bg-primary rounded-full w-0 transition-all" />
+                  </div>
+
+                  {/* Controls row */}
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      {/* Play/Pause */}
+                      <button
+                        onClick={() => {
+                          const iframe = document.querySelector('iframe') as HTMLIFrameElement;
+                          if (iframe?.contentWindow) {
+                            iframe.contentWindow.postMessage('play', '*');
+                          }
+                        }}
+                        className="text-white hover:text-primary transition-colors"
+                      >
+                        <svg className="w-7 h-7" fill="currentColor" viewBox="0 0 24 24">
+                          <path d="M8 5v14l11-7z"/>
+                        </svg>
+                      </button>
+
+                      {/* 10s Backward */}
+                      <button
+                        onClick={() => {
+                          const iframe = document.querySelector('iframe') as HTMLIFrameElement;
+                          if (iframe?.contentWindow) {
+                            iframe.contentWindow.postMessage('seek:-10', '*');
+                          }
+                        }}
+                        className="text-white/70 hover:text-white transition-colors"
+                        title="10s back"
+                      >
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12.066 11.2a1 1 0 000 1.6l5.334 4A1 1 0 0019 16V8a1 1 0 00-1.6-.8l-5.333 4zM4.066 11.2a1 1 0 000 1.6l5.334 4A1 1 0 0011 16V8a1 1 0 00-1.6-.8l-5.334 4z" />
+                        </svg>
+                      </button>
+
+                      {/* 10s Forward */}
+                      <button
+                        onClick={() => {
+                          const iframe = document.querySelector('iframe') as HTMLIFrameElement;
+                          if (iframe?.contentWindow) {
+                            iframe.contentWindow.postMessage('seek:10', '*');
+                          }
+                        }}
+                        className="text-white/70 hover:text-white transition-colors"
+                        title="10s forward"
+                      >
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11.933 12.8a1 1 0 000-1.6L6.6 7.2A1 1 0 005 8v8a1 1 0 001.6.8l5.333-4zM19.933 12.8a1 1 0 000-1.6l-5.333-4A1 1 0 0013 8v8a1 1 0 001.6.8l5.333-4z" />
+                        </svg>
+                      </button>
+
+                      {/* Volume */}
+                      <button className="text-white/70 hover:text-white transition-colors">
+                        <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                          <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.05zM14 3.23v2.06c2.89.86 5 3.54 5 6.78s-2.11 5.93-5 6.78v2.06c4.01-.91 7-4.49 7-8.78s-2.99-7.87-7-8.78z"/>
+                        </svg>
+                      </button>
+                    </div>
+
+                    <div className="flex items-center gap-3">
+                      {/* Captions */}
+                      <button className="text-white/70 hover:text-white transition-colors text-xs font-bold border border-white/30 px-1.5 py-0.5 rounded">
+                        CC
+                      </button>
+
+                      {/* Settings */}
+                      <button className="text-white/70 hover:text-white transition-colors">
+                        <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                          <path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.07.62-.07.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/>
+                        </svg>
+                      </button>
+
+                      {/* Fullscreen */}
+                      <button
+                        onClick={() => {
+                          const container = document.querySelector('.aspect-video')?.parentElement;
+                          if (container) {
+                            if (document.fullscreenElement) {
+                              document.exitFullscreen();
+                            } else {
+                              container.requestFullscreen();
+                            }
+                          }
+                        }}
+                        className="text-white/70 hover:text-white transition-colors"
+                      >
+                        <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                          <path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/>
+                        </svg>
+                      </button>
+                    </div>
+                  </div>
                 </div>
-              )}
-              {iframeActive && (
-                <div className="absolute bottom-2 right-2 z-10">
-                  <button
-                    onClick={(e) => { e.stopPropagation(); setIframeActive(false); }}
-                    className="px-2 py-1 rounded bg-black/60 text-white/70 text-xs hover:bg-black/80 transition-colors"
-                  >
-                    🔒 Lock
-                  </button>
-                </div>
-              )}
+              </div>
             </div>
           ) : (
             <div className="aspect-video rounded-xl bg-card border border-border flex flex-col items-center justify-center gap-3">
