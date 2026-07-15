@@ -140,7 +140,13 @@ export default function WatchPage() {
           {streamUrl && !streamError ? (
             <div
               className="relative aspect-video rounded-xl overflow-hidden bg-black border border-border"
-              onClick={() => setIframeActive(true)}
+              onClick={() => {
+                if (!iframeActive) {
+                  setIframeActive(true);
+                  // Auto-lock after 15 seconds to prevent ad redirects
+                  setTimeout(() => setIframeActive(false), 15000);
+                }
+              }}
             >
               <iframe
                 key={`${malId}-${currentEp}-${activeTab}-${activeServer}`}
@@ -153,12 +159,20 @@ export default function WatchPage() {
                 onError={handleStreamError}
               />
               {!iframeActive && (
-                <div className="absolute inset-0 flex items-center justify-center bg-black/50 cursor-pointer z-10">
-                  <div className="w-16 h-16 rounded-full bg-primary/90 flex items-center justify-center shadow-lg hover:bg-primary transition-colors">
-                    <svg className="w-7 h-7 text-white ml-1" fill="currentColor" viewBox="0 0 24 24">
-                      <path d="M8 5v14l11-7z"/>
-                    </svg>
-                  </div>
+                <div className="absolute inset-0 flex flex-col items-center justify-end pb-8 bg-black/30 z-10 pointer-events-none">
+                  <p className="text-white/60 text-sm bg-black/50 px-4 py-2 rounded-full backdrop-blur-sm">
+                    Tap to interact with player
+                  </p>
+                </div>
+              )}
+              {iframeActive && (
+                <div className="absolute bottom-2 right-2 z-10">
+                  <button
+                    onClick={(e) => { e.stopPropagation(); setIframeActive(false); }}
+                    className="px-2 py-1 rounded bg-black/60 text-white/70 text-xs hover:bg-black/80 transition-colors"
+                  >
+                    🔒 Lock
+                  </button>
                 </div>
               )}
             </div>
