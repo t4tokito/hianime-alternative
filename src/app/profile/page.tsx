@@ -3,6 +3,8 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { updateProfile } from "firebase/auth";
+import { ref, uploadString, getDownloadURL } from "firebase/storage";
+import { storage } from "@/lib/firebase";
 import { useAuth } from "@/lib/auth";
 import { getWatchHistory, WatchProgress } from "@/lib/watch-history";
 
@@ -43,20 +45,31 @@ export default function ProfilePage() {
     if (!file || !user) return;
     setSaving(true);
     try {
-      // Convert to base64 data URL for simplicity
-      const reader = new FileReader();
-      reader.onload = async () => {
-        const dataUrl = reader.result as string;
-        await updateProfile(user, { photoURL: dataUrl });
-        setMessage("Profile picture updated!");
-        setTimeout(() => setMessage(""), 2000);
-        setSaving(false);
-      };
-      reader.readAsDataURL(file);
+      // Resize image to max 200px before uploading
+      const canvas = document.createElement("canvas");
+      const ctx = canvas.getContext("2d");
+      const img = new window.Image();
+      img.src = URL.createObjectURL(file);
+      await new Promise((resolve) => { img.onload = resolve; });
+      const size = Math.min(img.width, img.height, 200);
+      canvas.width = size;
+      canvas.height = size;
+      ctx?.drawImage(img, (img.width - size) / 2, (img.height - size) / 2, size, size, 0, 0, size, size);
+      const resized = canvas.toDataURL("image/jpeg", 0.8);
+
+      // Upload to Firebase Storage
+      const storageRef = ref(storage, `profile-pics/${user.uid}`);
+      await uploadString(storageRef, resized, "data_url");
+      const downloadURL = await getDownloadURL(storageRef);
+
+      // Update auth profile
+      await updateProfile(user, { photoURL: downloadURL });
+      setMessage("Profile picture updated!");
+      setTimeout(() => setMessage(""), 2000);
     } catch {
       setMessage("Failed to update picture");
-      setSaving(false);
     }
+    setSaving(false);
   };
 
   if (authLoading || !user) return null;
