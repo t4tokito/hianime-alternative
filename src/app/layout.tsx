@@ -76,7 +76,7 @@ export const metadata: Metadata = {
     apple: "/apple-touch-icon.png",
   },
   other: {
-    "google-site-verification": "",
+    "google-site-verification": "eWzX1wUO-SoeistSLWcxU_bvznj4wuJCkZUvhnmPQ5o",
   },
   alternates: {
     canonical: "https://tokitotv.vercel.app",
