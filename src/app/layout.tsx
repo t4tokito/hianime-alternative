@@ -6,6 +6,9 @@ import { AuthProvider } from "@/lib/auth";
 export const metadata: Metadata = {
   title: "TokitoTV - Watch Anime Online Free",
   description: "Watch anime online for free. Stream the latest subbed and dubbed anime episodes without ads.",
+  icons: {
+    icon: "/favicon.svg",
+  },
 };
 
 export default function RootLayout({

@@ -78,15 +78,8 @@ export default function Navbar() {
   return (
     <nav className="fixed top-0 z-50 w-full bg-surface/95 backdrop-blur-md border-b border-border">
       <div className="max-w-[1900px] mx-auto flex items-center gap-3 px-4 md:px-8 h-16">
-        <Link href="/" className="flex items-center gap-2 flex-shrink-0">
-          <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
-            <svg viewBox="0 0 24 24" className="w-5 h-5 text-white" fill="currentColor">
-              <path d="M8 5v14l11-7z"/>
-            </svg>
-          </div>
-          <span className="text-xl font-bold text-foreground hidden sm:block">
-            Tokito<span className="text-primary">TV</span>
-          </span>
+        <Link href="/" className="flex items-center flex-shrink-0">
+          <img src="/logo.svg" alt="TokitoTV" className="h-8" />
         </Link>
 
         <div ref={searchRef} className="relative flex-1 max-w-[500px]">
