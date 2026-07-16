@@ -40,7 +40,7 @@ export const metadata: Metadata = {
       "Watch anime online for free on TokitoTV. Stream subbed and dubbed anime episodes without ads. Your ultimate Tokito Anime Hub.",
     images: [
       {
-        url: "https://tokitotv.com/logo.jpg",
+        url: "https://tokitotv.com/og-image.png",
         width: 1200,
         height: 630,
         alt: "TokitoTV - Watch Anime Online Free",
@@ -52,7 +52,7 @@ export const metadata: Metadata = {
     title: "TokitoTV - Watch Anime Online Free",
     description:
       "Watch anime online for free on TokitoTV. Stream subbed and dubbed anime episodes without ads.",
-    images: ["https://tokitotv.com/logo.jpg"],
+    images: ["https://tokitotv.com/og-image.png"],
   },
   robots: {
     index: true,
@@ -67,11 +67,13 @@ export const metadata: Metadata = {
   },
   icons: {
     icon: [
-      { url: "/logo.jpg", sizes: "any" },
-      { url: "/logo.jpg", type: "image/jpeg", sizes: "192x192" },
-      { url: "/logo.jpg", type: "image/jpeg", sizes: "512x512" },
+      { url: "/favicon.ico", sizes: "any" },
+      { url: "/favicon-48.png", type: "image/png", sizes: "48x48" },
+      { url: "/favicon-96.png", type: "image/png", sizes: "96x96" },
+      { url: "/favicon-192.png", type: "image/png", sizes: "192x192" },
+      { url: "/favicon-512.png", type: "image/png", sizes: "512x512" },
     ],
-    apple: "/logo.jpg",
+    apple: "/apple-touch-icon.png",
   },
   other: {
     "google-site-verification": "",
@@ -98,7 +100,7 @@ export default function RootLayout({
               name: "TokitoTV",
               alternateName: ["Tokito TV", "Tokito Anime", "Tokito Hub", "Tokito Lab"],
               url: "https://tokitotv.com",
-              image: "https://tokitotv.com/logo.jpg",
+              image: "https://tokitotv.com/og-image.png",
               description:
                 "Watch anime online for free. Stream subbed and dubbed anime episodes without ads.",
               potentialAction: {
