@@ -5,7 +5,8 @@ import { useRouter } from "next/navigation";
 import { useState, useEffect, useRef, useCallback } from "react";
 import { searchAnime } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
-import { supabase } from "@/lib/supabase";
+import { signOut } from "firebase/auth";
+import { auth } from "@/lib/firebase";
 import type { Anime } from "@/lib/types";
 
 export default function Navbar() {
@@ -146,7 +147,7 @@ export default function Navbar() {
                 </div>
                 <button
                   onClick={async () => {
-                    await supabase.auth.signOut();
+                    await signOut(auth);
                     setShowUserMenu(false);
                     router.push("/");
                     router.refresh();

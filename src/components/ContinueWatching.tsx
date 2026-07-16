@@ -11,7 +11,7 @@ export default function ContinueWatching() {
   const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
-    getWatchHistory(user?.id).then((data) => {
+    getWatchHistory(user?.uid).then((data) => {
       setHistory(data);
       setLoaded(true);
     });

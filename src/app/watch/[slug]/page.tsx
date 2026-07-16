@@ -65,7 +65,7 @@ export default function WatchPage() {
             totalEpisodes: data.episodes || 0,
             malId: data.mal_id,
             watchedAt: new Date().toISOString(),
-          }, user?.id);
+          }, user?.uid);
         }
         else setError(true);
       })
