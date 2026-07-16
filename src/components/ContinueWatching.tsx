@@ -42,6 +42,9 @@ export default function ContinueWatching() {
                     src={item.animeImage}
                     alt={item.animeTitle}
                     className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                    style={{
+                      objectPosition: `${10 + (item.episodeNumber % 5) * 20}% center`,
+                    }}
                   />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center text-muted">
@@ -50,6 +53,13 @@ export default function ContinueWatching() {
                     </svg>
                   </div>
                 )}
+                {/* Colored gradient overlay per episode */}
+                <div
+                  className="absolute inset-0 opacity-30"
+                  style={{
+                    background: `linear-gradient(135deg, hsl(${(item.episodeNumber * 47) % 360}, 60%, 30%) 0%, transparent 60%)`,
+                  }}
+                />
                 {/* Episode number badge */}
                 <div className="absolute top-2 left-2 px-2 py-1 rounded bg-primary text-foreground text-xs font-bold">
                   EP {item.episodeNumber}
