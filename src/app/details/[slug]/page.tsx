@@ -95,32 +95,32 @@ export default async function AnimeDetailsPage({
 
           <div className="flex flex-wrap gap-2 mb-4">
             {anime.Type && (
-              <span className="px-3 py-1 rounded-full bg-primary/20 text-primary text-sm font-medium">{anime.Type}</span>
+              <span className="px-3 py-1 rounded-full bg-secondary/20 text-secondary text-sm font-medium">{anime.Type}</span>
             )}
             {anime.Status && (
-              <span className="px-3 py-1 rounded-full bg-green-500/20 text-green-400 text-sm">{anime.Status}</span>
+              <span className="px-3 py-1 rounded-full bg-secondary/20 text-secondary text-sm">{anime.Status}</span>
             )}
             {anime.Score && anime.Score !== "N/A" && (
-              <span className="px-3 py-1 rounded-full bg-yellow-500/20 text-yellow-400 text-sm">{anime.Score}</span>
+              <span className="px-3 py-1 rounded-full bg-primary/20 text-primary text-sm">{anime.Score}</span>
             )}
             {anime.Duration && (
-              <span className="px-3 py-1 rounded-full bg-white/5 text-muted text-sm">{anime.Duration}</span>
+              <span className="px-3 py-1 rounded-full bg-surface text-muted text-sm">{anime.Duration}</span>
             )}
           </div>
 
           <div className="flex gap-3 mb-4 text-sm">
             {episodes > 0 && (
-              <span className="px-2 py-1 rounded bg-white/10 text-muted">{episodes} Episodes</span>
+              <span className="px-2 py-1 rounded bg-surface text-muted">{episodes} Episodes</span>
             )}
             {anime.studios && (
-              <span className="px-2 py-1 rounded bg-white/10 text-muted">{anime.studios}</span>
+              <span className="px-2 py-1 rounded bg-surface text-muted">{anime.studios}</span>
             )}
           </div>
 
           {episodes > 0 && (
             <Link
               href={firstEpUrl}
-              className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-primary text-white font-semibold text-sm hover:bg-primary/90 transition-colors mb-4"
+              className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-primary text-foreground font-semibold text-sm hover:bg-primary/80 transition-colors mb-4"
             >
               <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
               Watch Now

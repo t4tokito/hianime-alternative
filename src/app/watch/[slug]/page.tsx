@@ -184,7 +184,7 @@ export default function WatchPage() {
               {currentEp < totalEps && (
                 <Link
                   href={getWatchUrl(currentEp + 1)}
-                  className="px-4 py-2 rounded-lg bg-primary text-white text-sm hover:bg-primary/90 transition-colors"
+                  className="px-4 py-2 rounded-lg bg-primary text-foreground text-sm hover:bg-primary/80 transition-colors"
                 >
                   Next &rarr;
                 </Link>
@@ -201,7 +201,7 @@ export default function WatchPage() {
               <button
                 onClick={() => handleServerChange("sub")}
                 className={`flex-1 px-4 py-3 text-sm font-medium transition-colors ${
-                  activeTab === "sub" ? "bg-primary text-white" : "text-muted hover:text-foreground"
+                  activeTab === "sub" ? "bg-primary text-foreground" : "text-muted hover:text-foreground"
                 }`}
               >
                 Sub
@@ -209,7 +209,7 @@ export default function WatchPage() {
               <button
                 onClick={() => handleServerChange("dub")}
                 className={`flex-1 px-4 py-3 text-sm font-medium transition-colors ${
-                  activeTab === "dub" ? "bg-primary text-white" : "text-muted hover:text-foreground"
+                  activeTab === "dub" ? "bg-primary text-foreground" : "text-muted hover:text-foreground"
                 }`}
               >
                 Dub
@@ -224,7 +224,7 @@ export default function WatchPage() {
                     onClick={() => setActiveServer(idx)}
                     className={`w-full px-3 py-2 rounded-lg text-sm text-left transition-colors ${
                       activeServer === idx
-                        ? "bg-primary text-white"
+                        ? "bg-primary text-foreground"
                         : "bg-surface text-foreground hover:bg-card-hover"
                     }`}
                   >
@@ -249,7 +249,7 @@ export default function WatchPage() {
                     href={getWatchUrl(ep)}
                     className={`flex items-center justify-center h-10 rounded-lg text-sm font-medium transition-colors ${
                       ep === currentEp
-                        ? "bg-primary text-white ring-2 ring-primary/50"
+                        ? "bg-primary text-foreground ring-2 ring-primary/50"
                         : "bg-surface text-foreground hover:bg-card-hover border border-border"
                     }`}
                   >

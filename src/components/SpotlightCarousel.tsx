@@ -63,29 +63,29 @@ export default function SpotlightCarousel({ items }: { items: Anime[] }) {
       <div className="absolute inset-0 flex items-end md:items-center px-6 md:px-12 lg:px-16 pb-8 md:pb-0 z-10">
         <div className="max-w-xl overflow-hidden">
           <div className="flex items-center gap-2 mb-3">
-            <span className="text-xs font-bold px-2 py-1 rounded bg-primary text-white">
+            <span className="text-xs font-bold px-2 py-1 rounded bg-primary text-foreground">
               #{current + 1} Spotlight
             </span>
             {anime.Type && (
-              <span className="text-xs px-2 py-1 rounded bg-white/10 text-white/80">{anime.Type}</span>
+              <span className="text-xs px-2 py-1 rounded bg-secondary/20 text-secondary">{anime.Type}</span>
             )}
           </div>
-          <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold text-white mb-2 overflow-hidden" style={{ display: '-webkit-box', WebkitLineClamp: 1, WebkitBoxOrient: 'vertical' }}>{title}</h2>
-          {jpTitle && <p className="text-sm text-white/50 mb-2 overflow-hidden" style={{ display: '-webkit-box', WebkitLineClamp: 1, WebkitBoxOrient: 'vertical' }}>{jpTitle}</p>}
+          <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold text-foreground mb-2 overflow-hidden" style={{ display: '-webkit-box', WebkitLineClamp: 1, WebkitBoxOrient: 'vertical' }}>{title}</h2>
+          {jpTitle && <p className="text-sm text-secondary/70 mb-2 overflow-hidden" style={{ display: '-webkit-box', WebkitLineClamp: 1, WebkitBoxOrient: 'vertical' }}>{jpTitle}</p>}
           {anime.description && (
-            <p className="text-sm text-white/70 mb-4 hidden md:block overflow-hidden" style={{ display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>{anime.description}</p>
+            <p className="text-sm text-foreground/60 mb-4 hidden md:block overflow-hidden" style={{ display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>{anime.description}</p>
           )}
           <div className="flex items-center gap-3">
             <Link
               href={`/details/${anime._id}`}
-              className="inline-flex items-center gap-2 px-6 py-2.5 rounded-lg bg-primary text-white font-medium text-sm hover:bg-primary/90 transition-colors"
+              className="inline-flex items-center gap-2 px-6 py-2.5 rounded-lg bg-primary text-foreground font-medium text-sm hover:bg-primary/80 transition-colors"
             >
               <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
               Watch Now
             </Link>
             <Link
               href={`/details/${anime._id}`}
-              className="inline-flex items-center gap-2 px-6 py-2.5 rounded-lg bg-white/10 text-white font-medium text-sm hover:bg-white/20 transition-colors backdrop-blur-sm"
+              className="inline-flex items-center gap-2 px-6 py-2.5 rounded-lg bg-secondary/10 text-secondary font-medium text-sm hover:bg-secondary/20 transition-colors backdrop-blur-sm"
             >
               Details
             </Link>
@@ -99,7 +99,7 @@ export default function SpotlightCarousel({ items }: { items: Anime[] }) {
             <button
               key={i}
               onClick={() => setCurrent(i)}
-              className={`w-2 h-2 rounded-full transition-all ${i === current ? 'bg-primary w-6' : 'bg-white/30 hover:bg-white/50'}`}
+              className={`w-2 h-2 rounded-full transition-all ${i === current ? 'bg-primary w-6' : 'bg-secondary/30 hover:bg-secondary/50'}`}
             />
           ))}
         </div>

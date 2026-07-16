@@ -28,18 +28,18 @@ export default function AnimeCard({ anime, href }: { anime: Anime; href?: string
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
         <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
           <div className="w-12 h-12 rounded-full bg-primary/90 flex items-center justify-center shadow-lg">
-            <svg className="w-5 h-5 text-white ml-0.5" fill="currentColor" viewBox="0 0 24 24">
+            <svg className="w-5 h-5 text-foreground ml-0.5" fill="currentColor" viewBox="0 0 24 24">
               <path d="M8 5v14l11-7z"/>
             </svg>
           </div>
         </div>
         {anime.Type && (
-          <span className="absolute top-2 right-2 text-[10px] px-1.5 py-0.5 rounded bg-primary/80 text-white font-medium">
+          <span className="absolute top-2 right-2 text-[10px] px-1.5 py-0.5 rounded bg-secondary/20 text-secondary font-medium">
             {anime.Type}
           </span>
         )}
         {anime.Score && anime.Score !== "N/A" && (
-          <span className="absolute top-2 left-2 text-[10px] px-1.5 py-0.5 rounded bg-yellow-500/80 text-black font-medium">
+          <span className="absolute top-2 left-2 text-[10px] px-1.5 py-0.5 rounded bg-primary/80 text-foreground font-medium">
             {anime.Score}
           </span>
         )}
