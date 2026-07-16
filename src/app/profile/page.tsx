@@ -7,6 +7,10 @@ import { useAuth } from "@/lib/auth";
 import { getWatchHistory, WatchProgress } from "@/lib/watch-history";
 import { getProfilePics, getUserProfile, setUserProfile, UserProfile } from "@/lib/profile";
 
+function encodePicUrl(pic: string): string {
+  return encodeURI(pic);
+}
+
 export default function ProfilePage() {
   const { user, loading: authLoading } = useAuth();
   const router = useRouter();
@@ -48,11 +52,16 @@ export default function ProfilePage() {
   };
 
   const handlePfpSelect = async (picUrl: string) => {
-    if (!user || !userProfile) return;
+    if (!user) return;
     setSaving(true);
     try {
-      await setUserProfile(user.uid, { ...userProfile, avatarUrl: picUrl });
-      setUserProfileState({ ...userProfile, avatarUrl: picUrl });
+      const profile = userProfile || {
+        displayName: displayName,
+        avatarUrl: picUrl,
+        createdAt: new Date().toISOString(),
+      };
+      await setUserProfile(user.uid, { ...profile, avatarUrl: picUrl });
+      setUserProfileState({ ...profile, avatarUrl: picUrl });
       setMessage("Profile picture updated!");
       setTimeout(() => setMessage(""), 2000);
     } catch {
@@ -122,7 +131,7 @@ export default function ProfilePage() {
                   : "border-border hover:border-primary/50"
               }`}
             >
-              <img src={pic} alt="" className="w-full h-full object-cover" />
+              <img src={encodePicUrl(pic)} alt="" className="w-full h-full object-cover" />
               {currentAvatar === pic && (
                 <div className="absolute inset-0 bg-primary/20 flex items-center justify-center">
                   <svg className="w-6 h-6 text-primary" fill="currentColor" viewBox="0 0 24 24">
