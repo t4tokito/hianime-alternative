@@ -5,6 +5,18 @@ import HorizontalScroll from "@/components/HorizontalScroll";
 import SpotlightCarousel from "@/components/SpotlightCarousel";
 import ContinueWatching from "@/components/ContinueWatching";
 import Link from "next/link";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "TokitoTV - Watch Anime Online Free | Tokito Anime Hub",
+  description:
+    "Watch anime online for free on TokitoTV. Stream the latest subbed and dubbed anime episodes. Your ultimate Tokito Anime Hub for trending, popular, and top airing anime.",
+  openGraph: {
+    title: "TokitoTV - Watch Anime Online Free",
+    description:
+      "Watch anime online for free. Stream subbed and dubbed anime episodes without ads.",
+  },
+};
 
 export const revalidate = 300;
 
