@@ -29,18 +29,18 @@ export const metadata: Metadata = {
   authors: [{ name: "TokitoTV" }],
   creator: "TokitoTV",
   publisher: "TokitoTV",
-  metadataBase: new URL("https://tokitotv.com"),
+  metadataBase: new URL("https://tokitotv.vercel.app"),
   openGraph: {
     type: "website",
     locale: "en_US",
-    url: "https://tokitotv.com",
+    url: "https://tokitotv.vercel.app",
     siteName: "TokitoTV",
     title: "TokitoTV - Watch Anime Online Free | Tokito Anime Hub",
     description:
       "Watch anime online for free on TokitoTV. Stream subbed and dubbed anime episodes without ads. Your ultimate Tokito Anime Hub.",
     images: [
       {
-        url: "https://tokitotv.com/og-image.png",
+        url: "https://tokitotv.vercel.app/og-image.png",
         width: 1200,
         height: 630,
         alt: "TokitoTV - Watch Anime Online Free",
@@ -52,7 +52,7 @@ export const metadata: Metadata = {
     title: "TokitoTV - Watch Anime Online Free",
     description:
       "Watch anime online for free on TokitoTV. Stream subbed and dubbed anime episodes without ads.",
-    images: ["https://tokitotv.com/og-image.png"],
+    images: ["https://tokitotv.vercel.app/og-image.png"],
   },
   robots: {
     index: true,
@@ -79,7 +79,7 @@ export const metadata: Metadata = {
     "google-site-verification": "",
   },
   alternates: {
-    canonical: "https://tokitotv.com",
+    canonical: "https://tokitotv.vercel.app",
   },
 };
 
@@ -99,13 +99,13 @@ export default function RootLayout({
               "@type": "WebSite",
               name: "TokitoTV",
               alternateName: ["Tokito TV", "Tokito Anime", "Tokito Hub", "Tokito Lab"],
-              url: "https://tokitotv.com",
-              image: "https://tokitotv.com/og-image.png",
+              url: "https://tokitotv.vercel.app",
+              image: "https://tokitotv.vercel.app/og-image.png",
               description:
                 "Watch anime online for free. Stream subbed and dubbed anime episodes without ads.",
               potentialAction: {
                 "@type": "SearchAction",
-                target: "https://tokitotv.com/search?q={search_term_string}",
+                target: "https://tokitotv.vercel.app/search?q={search_term_string}",
                 "query-input": "required name=search_term_string",
               },
             }),

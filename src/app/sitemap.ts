@@ -1,7 +1,7 @@
 import { MetadataRoute } from "next";
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const baseUrl = "https://tokitotv.com";
+  const baseUrl = "https://tokitotv.vercel.app";
 
   return [
     {
