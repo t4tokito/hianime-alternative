@@ -3,10 +3,12 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { updateProfile } from "firebase/auth";
-import { ref, uploadString, getDownloadURL } from "firebase/storage";
-import { storage } from "@/lib/firebase";
 import { useAuth } from "@/lib/auth";
 import { getWatchHistory, WatchProgress } from "@/lib/watch-history";
+
+function getAvatarUrl(name: string): string {
+  return `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(name)}&backgroundColor=4A70A9,8FABD4,0D0D0D&textColor=EFECE3&fontSize=40`;
+}
 
 export default function ProfilePage() {
   const { user, loading: authLoading } = useAuth();
@@ -40,48 +42,11 @@ export default function ProfilePage() {
     setSaving(false);
   };
 
-  const handlePfpChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file || !user) return;
-    setSaving(true);
-    try {
-      // Resize image to max 200px before uploading
-      const canvas = document.createElement("canvas");
-      const ctx = canvas.getContext("2d");
-      const img = new window.Image();
-      img.src = URL.createObjectURL(file);
-      await new Promise((resolve) => { img.onload = resolve; });
-      const size = Math.min(img.width, img.height, 200);
-      canvas.width = size;
-      canvas.height = size;
-      ctx?.drawImage(img, (img.width - size) / 2, (img.height - size) / 2, size, size, 0, 0, size, size);
-      const resized = canvas.toDataURL("image/jpeg", 0.8);
-
-      // Upload to Firebase Storage
-      const storageRef = ref(storage, `profile-pics/${user.uid}`);
-      await uploadString(storageRef, resized, "data_url");
-      const downloadURL = await getDownloadURL(storageRef);
-
-      // Update auth profile
-      await updateProfile(user, { photoURL: downloadURL });
-      setMessage("Profile picture updated!");
-      setTimeout(() => setMessage(""), 2000);
-    } catch {
-      setMessage("Failed to update picture");
-    }
-    setSaving(false);
-  };
-
   if (authLoading || !user) return null;
 
-  // Stats
+  const displayName = user.displayName || user.email?.split("@")[0] || "User";
   const uniqueAnime = new Set(history.map((h) => h.animeId)).size;
   const totalEpisodes = history.length;
-  const uniqueTypes = new Map<string, number>();
-  history.forEach((h) => {
-    const type = h.animeId.includes("movie") ? "Movies" : "Series";
-    uniqueTypes.set(type, (uniqueTypes.get(type) || 0) + 1);
-  });
 
   return (
     <div className="max-w-2xl mx-auto px-4 md:px-8 py-8">
@@ -90,24 +55,13 @@ export default function ProfilePage() {
       {/* Profile Card */}
       <div className="bg-card border border-border rounded-xl p-6 mb-6">
         <div className="flex items-center gap-5">
-          <div className="relative group">
-            <div className="w-20 h-20 rounded-full bg-primary flex items-center justify-center text-foreground text-2xl font-bold overflow-hidden">
-              {user.photoURL ? (
-                <img src={user.photoURL} alt="" className="w-full h-full object-cover" />
-              ) : (
-                user.email?.charAt(0).toUpperCase()
-              )}
-            </div>
-            <label className="absolute inset-0 rounded-full bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer">
-              <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
-              </svg>
-              <input type="file" accept="image/*" onChange={handlePfpChange} className="hidden" />
-            </label>
-          </div>
+          <img
+            src={user.photoURL || getAvatarUrl(displayName)}
+            alt={displayName}
+            className="w-20 h-20 rounded-full object-cover border-2 border-primary"
+          />
           <div className="flex-1">
-            <p className="text-foreground font-medium">{user.displayName || "No name set"}</p>
+            <p className="text-foreground font-medium">{displayName}</p>
             <p className="text-muted text-sm">{user.email}</p>
             <p className="text-muted text-xs mt-1">
               Member since {new Date(user.metadata.creationTime || "").toLocaleDateString()}
@@ -127,7 +81,7 @@ export default function ProfilePage() {
           <p className="text-xs text-muted mt-1">Episodes Watched</p>
         </div>
         <div className="bg-card border border-border rounded-xl p-4 text-center">
-          <p className="text-2xl font-bold text-foreground">{history.length > 0 ? Math.round(totalEpisodes / uniqueAnime) : 0}</p>
+          <p className="text-2xl font-bold text-foreground">{uniqueAnime > 0 ? Math.round(totalEpisodes / uniqueAnime) : 0}</p>
           <p className="text-xs text-muted mt-1">Avg Ep/Anime</p>
         </div>
       </div>
@@ -151,12 +105,10 @@ export default function ProfilePage() {
             {saving ? "Saving..." : "Save"}
           </button>
         </div>
-        {message && (
-          <p className="text-sm text-secondary mt-2">{message}</p>
-        )}
+        {message && <p className="text-sm text-secondary mt-2">{message}</p>}
       </div>
 
-      {/* Watch History Summary */}
+      {/* Watch History */}
       {history.length > 0 && (
         <div className="bg-card border border-border rounded-xl p-6">
           <h2 className="text-sm font-semibold text-muted uppercase tracking-wider mb-3">Recent Watch History</h2>
