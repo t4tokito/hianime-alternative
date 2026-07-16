@@ -12,7 +12,7 @@ import type { Anime } from "@/lib/types";
 
 export default function Navbar() {
   const router = useRouter();
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
   const [query, setQuery] = useState("");
   const [suggestions, setSuggestions] = useState<Anime[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
@@ -136,7 +136,9 @@ export default function Navbar() {
         </div>
 
         {/* Auth Section */}
-        {user ? (
+        {loading ? (
+          <div className="w-9 h-9 rounded-full bg-skeleton animate-pulse flex-shrink-0" />
+        ) : user ? (
           <div ref={userMenuRef} className="relative flex-shrink-0">
             <button
               onClick={() => setShowUserMenu(!showUserMenu)}
