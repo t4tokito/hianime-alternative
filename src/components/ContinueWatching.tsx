@@ -12,7 +12,15 @@ export default function ContinueWatching() {
 
   useEffect(() => {
     getWatchHistory(user?.uid).then((data) => {
-      setHistory(data);
+      // Keep only the latest episode per anime
+      const latestPerAnime = new Map<string, WatchProgress>();
+      for (const item of data) {
+        const existing = latestPerAnime.get(item.animeId);
+        if (!existing || item.episodeNumber > existing.episodeNumber) {
+          latestPerAnime.set(item.animeId, item);
+        }
+      }
+      setHistory(Array.from(latestPerAnime.values()));
       setLoaded(true);
     });
   }, [user]);
