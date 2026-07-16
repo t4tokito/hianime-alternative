@@ -6,7 +6,7 @@ const PROFILE_PICS = [
   "/profile_pics/534309943317450948.jpeg",
   "/profile_pics/989877193123640090.jpeg",
   "/profile_pics/Denji.jpeg",
-  "/profile_pics/Luka stressed  #_#.jpeg",
+  "/profile_pics/luka-stressed.jpeg",
   "/profile_pics/لوفيوو.jpeg",
 ];
 
