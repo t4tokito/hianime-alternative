@@ -4,15 +4,20 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, useEffect, useRef, useCallback } from "react";
 import { searchAnime } from "@/lib/api";
+import { useAuth } from "@/lib/auth";
+import { supabase } from "@/lib/supabase";
 import type { Anime } from "@/lib/types";
 
 export default function Navbar() {
   const router = useRouter();
+  const { user } = useAuth();
   const [query, setQuery] = useState("");
   const [suggestions, setSuggestions] = useState<Anime[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
+  const [showUserMenu, setShowUserMenu] = useState(false);
   const searchRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const userMenuRef = useRef<HTMLDivElement>(null);
   const debounceRef = useRef<NodeJS.Timeout>(null);
 
   const doSearch = useCallback(() => {
@@ -26,6 +31,9 @@ export default function Navbar() {
     function handleInteraction(e: MouseEvent | TouchEvent) {
       if (searchRef.current && !searchRef.current.contains(e.target as Node)) {
         setShowSuggestions(false);
+      }
+      if (userMenuRef.current && !userMenuRef.current.contains(e.target as Node)) {
+        setShowUserMenu(false);
       }
     }
     document.addEventListener("mousedown", handleInteraction);
@@ -121,6 +129,43 @@ export default function Navbar() {
             </div>
           )}
         </div>
+
+        {/* Auth Section */}
+        {user ? (
+          <div ref={userMenuRef} className="relative flex-shrink-0">
+            <button
+              onClick={() => setShowUserMenu(!showUserMenu)}
+              className="w-9 h-9 rounded-full bg-primary flex items-center justify-center text-foreground font-bold text-sm hover:bg-primary/80 transition-colors"
+            >
+              {user.email?.charAt(0).toUpperCase()}
+            </button>
+            {showUserMenu && (
+              <div className="absolute right-0 top-full mt-2 w-56 bg-card border border-border rounded-lg shadow-xl overflow-hidden z-50">
+                <div className="px-4 py-3 border-b border-border">
+                  <p className="text-sm font-medium text-foreground truncate">{user.email}</p>
+                </div>
+                <button
+                  onClick={async () => {
+                    await supabase.auth.signOut();
+                    setShowUserMenu(false);
+                    router.push("/");
+                    router.refresh();
+                  }}
+                  className="w-full px-4 py-2.5 text-left text-sm text-foreground hover:bg-card-hover transition-colors"
+                >
+                  Sign Out
+                </button>
+              </div>
+            )}
+          </div>
+        ) : (
+          <Link
+            href="/login"
+            className="flex-shrink-0 px-4 py-2 bg-primary text-foreground text-sm font-medium rounded-lg hover:bg-primary/80 transition-colors"
+          >
+            Login
+          </Link>
+        )}
       </div>
     </nav>
   );

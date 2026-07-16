@@ -4,6 +4,8 @@ import { useState, useEffect, useCallback } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import type { Anime } from "@/lib/types";
+import { useAuth } from "@/lib/auth";
+import { saveWatchProgress } from "@/lib/watch-history";
 
 const STREAM_SERVERS = [
   { name: "Server 1", base: "https://animeplay.cfd/stream/mal" },
@@ -13,6 +15,7 @@ const STREAM_SERVERS = [
 export default function WatchPage() {
   const params = useParams();
   const slug = params.slug as string;
+  const { user } = useAuth();
 
   const [anime, setAnime] = useState<Anime | null>(null);
   const [loading, setLoading] = useState(true);
@@ -51,7 +54,19 @@ export default function WatchPage() {
     fetch(`/api/anime/${anilistId}`)
       .then((res) => res.json())
       .then((data) => {
-        if (data) setAnime(data);
+        if (data) {
+          setAnime(data);
+          // Save watch progress
+          saveWatchProgress({
+            animeId: `anilist-${anilistId}`,
+            animeTitle: data.English || data.title || "",
+            animeImage: data.image || "",
+            episodeNumber: epNum,
+            totalEpisodes: data.episodes || 0,
+            malId: data.mal_id,
+            watchedAt: new Date().toISOString(),
+          }, user?.id);
+        }
         else setError(true);
       })
       .catch(() => setError(true))

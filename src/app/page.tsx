@@ -3,6 +3,7 @@ import { toAnime } from "@/lib/anilist";
 import AnimeGrid from "@/components/AnimeGrid";
 import HorizontalScroll from "@/components/HorizontalScroll";
 import SpotlightCarousel from "@/components/SpotlightCarousel";
+import ContinueWatching from "@/components/ContinueWatching";
 import Link from "next/link";
 
 export const revalidate = 300;
@@ -39,6 +40,10 @@ export default async function HomePage() {
   return (
     <div className="max-w-[1900px] mx-auto px-4 md:px-8 py-6">
       <SpotlightCarousel items={data.trending.slice(0, 5)} />
+
+      <div className="mt-8">
+        <ContinueWatching />
+      </div>
 
       <div className="mt-8">
         <HorizontalScroll animes={data.trending} title="Trending Now" />
