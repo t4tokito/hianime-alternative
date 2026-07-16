@@ -7,6 +7,7 @@ import { createUserWithEmailAndPassword, signInWithPopup } from "firebase/auth";
 import { auth, googleProvider } from "@/lib/firebase";
 import { useAuth } from "@/lib/auth";
 import { migrateLocalStorageToAccount } from "@/lib/watch-history";
+import { initUserProfile } from "@/lib/profile";
 
 export default function SignupPage() {
   const router = useRouter();
@@ -38,6 +39,7 @@ export default function SignupPage() {
     try {
       const result = await createUserWithEmailAndPassword(auth, email, password);
       await migrateLocalStorageToAccount(result.user.uid);
+      await initUserProfile(result.user.uid, result.user.email?.split("@")[0] || "User");
       router.push("/");
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Signup failed");
@@ -51,6 +53,7 @@ export default function SignupPage() {
     try {
       const result = await signInWithPopup(auth, googleProvider);
       await migrateLocalStorageToAccount(result.user.uid);
+      await initUserProfile(result.user.uid, result.user.displayName || result.user.email?.split("@")[0] || "User");
       router.push("/");
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Google signup failed");

@@ -5,18 +5,17 @@ import { useRouter } from "next/navigation";
 import { updateProfile } from "firebase/auth";
 import { useAuth } from "@/lib/auth";
 import { getWatchHistory, WatchProgress } from "@/lib/watch-history";
-
-function getAvatarUrl(name: string): string {
-  return `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(name)}&backgroundColor=4A70A9,8FABD4,0D0D0D&textColor=EFECE3&fontSize=40`;
-}
+import { getProfilePics, getUserProfile, setUserProfile, UserProfile } from "@/lib/profile";
 
 export default function ProfilePage() {
   const { user, loading: authLoading } = useAuth();
   const router = useRouter();
   const [history, setHistory] = useState<WatchProgress[]>([]);
   const [name, setName] = useState("");
+  const [userProfile, setUserProfileState] = useState<UserProfile | null>(null);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState("");
+  const pics = getProfilePics();
 
   useEffect(() => {
     if (!authLoading && !user) router.push("/login");
@@ -26,18 +25,38 @@ export default function ProfilePage() {
     if (user) {
       setName(user.displayName || "");
       getWatchHistory(user.uid).then(setHistory);
+      getUserProfile(user.uid).then(setUserProfileState);
     }
   }, [user]);
+
+  const currentAvatar = userProfile?.avatarUrl || user?.photoURL || "";
 
   const handleSaveName = async () => {
     if (!user || !name.trim()) return;
     setSaving(true);
     try {
       await updateProfile(user, { displayName: name.trim() });
+      if (userProfile) {
+        await setUserProfile(user.uid, { ...userProfile, displayName: name.trim() });
+      }
       setMessage("Name updated!");
       setTimeout(() => setMessage(""), 2000);
     } catch {
       setMessage("Failed to update name");
+    }
+    setSaving(false);
+  };
+
+  const handlePfpSelect = async (picUrl: string) => {
+    if (!user || !userProfile) return;
+    setSaving(true);
+    try {
+      await setUserProfile(user.uid, { ...userProfile, avatarUrl: picUrl });
+      setUserProfileState({ ...userProfile, avatarUrl: picUrl });
+      setMessage("Profile picture updated!");
+      setTimeout(() => setMessage(""), 2000);
+    } catch {
+      setMessage("Failed to update picture");
     }
     setSaving(false);
   };
@@ -55,11 +74,13 @@ export default function ProfilePage() {
       {/* Profile Card */}
       <div className="bg-card border border-border rounded-xl p-6 mb-6">
         <div className="flex items-center gap-5">
-          <img
-            src={user.photoURL || getAvatarUrl(displayName)}
-            alt={displayName}
-            className="w-20 h-20 rounded-full object-cover border-2 border-primary"
-          />
+          {currentAvatar ? (
+            <img src={currentAvatar} alt={displayName} className="w-20 h-20 rounded-full object-cover border-2 border-primary" />
+          ) : (
+            <div className="w-20 h-20 rounded-full bg-primary flex items-center justify-center text-foreground text-2xl font-bold">
+              {displayName.charAt(0).toUpperCase()}
+            </div>
+          )}
           <div className="flex-1">
             <p className="text-foreground font-medium">{displayName}</p>
             <p className="text-muted text-sm">{user.email}</p>
@@ -86,6 +107,35 @@ export default function ProfilePage() {
         </div>
       </div>
 
+      {/* Change Profile Picture */}
+      <div className="bg-card border border-border rounded-xl p-6 mb-6">
+        <h2 className="text-sm font-semibold text-muted uppercase tracking-wider mb-3">Profile Picture</h2>
+        <div className="grid grid-cols-3 sm:grid-cols-6 gap-3">
+          {pics.map((pic) => (
+            <button
+              key={pic}
+              onClick={() => handlePfpSelect(pic)}
+              disabled={saving}
+              className={`relative rounded-xl overflow-hidden border-2 transition-all aspect-square ${
+                currentAvatar === pic
+                  ? "border-primary ring-2 ring-primary/50"
+                  : "border-border hover:border-primary/50"
+              }`}
+            >
+              <img src={pic} alt="" className="w-full h-full object-cover" />
+              {currentAvatar === pic && (
+                <div className="absolute inset-0 bg-primary/20 flex items-center justify-center">
+                  <svg className="w-6 h-6 text-primary" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+                  </svg>
+                </div>
+              )}
+            </button>
+          ))}
+        </div>
+        {message && <p className="text-sm text-secondary mt-3">{message}</p>}
+      </div>
+
       {/* Edit Name */}
       <div className="bg-card border border-border rounded-xl p-6 mb-6">
         <h2 className="text-sm font-semibold text-muted uppercase tracking-wider mb-3">Display Name</h2>
@@ -105,7 +155,6 @@ export default function ProfilePage() {
             {saving ? "Saving..." : "Save"}
           </button>
         </div>
-        {message && <p className="text-sm text-secondary mt-2">{message}</p>}
       </div>
 
       {/* Watch History */}

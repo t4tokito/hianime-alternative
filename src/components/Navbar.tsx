@@ -7,6 +7,7 @@ import { searchAnime } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
 import { signOut } from "firebase/auth";
 import { auth } from "@/lib/firebase";
+import { getUserProfile } from "@/lib/profile";
 import type { Anime } from "@/lib/types";
 
 export default function Navbar() {
@@ -16,6 +17,7 @@ export default function Navbar() {
   const [suggestions, setSuggestions] = useState<Anime[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
+  const [avatarUrl, setAvatarUrl] = useState("");
   const searchRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const userMenuRef = useRef<HTMLDivElement>(null);
@@ -44,6 +46,15 @@ export default function Navbar() {
       document.removeEventListener("touchstart", handleInteraction);
     };
   }, []);
+
+  // Fetch user avatar from Firestore
+  useEffect(() => {
+    if (user) {
+      getUserProfile(user.uid).then((profile) => {
+        if (profile?.avatarUrl) setAvatarUrl(profile.avatarUrl);
+      });
+    }
+  }, [user]);
 
   const handleInputChange = (value: string) => {
     setQuery(value);
@@ -138,11 +149,9 @@ export default function Navbar() {
               onClick={() => setShowUserMenu(!showUserMenu)}
               className="w-9 h-9 rounded-full bg-primary flex items-center justify-center text-foreground font-bold text-sm hover:bg-primary/80 transition-colors overflow-hidden"
             >
-              {user.photoURL ? (
-                <img src={user.photoURL} alt="" className="w-full h-full object-cover" />
-              ) : (
-                user.email?.charAt(0).toUpperCase()
-              )}
+              {avatarUrl ? (
+                <img src={avatarUrl} alt="" className="w-full h-full object-cover" />
+              ) : user.email?.charAt(0).toUpperCase()}
             </button>
             {showUserMenu && (
               <div className="absolute right-0 top-full mt-2 w-56 bg-card border border-border rounded-lg shadow-xl overflow-hidden z-50">
