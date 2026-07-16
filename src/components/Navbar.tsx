@@ -79,7 +79,7 @@ export default function Navbar() {
     <nav className="fixed top-0 z-50 w-full bg-surface/95 backdrop-blur-md border-b border-border">
       <div className="max-w-[1900px] mx-auto flex items-center gap-3 px-4 md:px-8 h-16">
         <Link href="/" className="flex items-center flex-shrink-0">
-          <img src="/logo.svg" alt="TokitoTV" className="h-8" />
+          <img src="/logo.jpg" alt="TokitoTV" className="h-8" />
         </Link>
 
         <div ref={searchRef} className="relative flex-1 max-w-[500px]">
