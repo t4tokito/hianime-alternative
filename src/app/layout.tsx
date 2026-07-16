@@ -40,7 +40,7 @@ export const metadata: Metadata = {
       "Watch anime online for free on TokitoTV. Stream subbed and dubbed anime episodes without ads. Your ultimate Tokito Anime Hub.",
     images: [
       {
-        url: "/logo.jpg",
+        url: "https://tokitotv.com/logo.jpg",
         width: 1200,
         height: 630,
         alt: "TokitoTV - Watch Anime Online Free",
@@ -52,7 +52,7 @@ export const metadata: Metadata = {
     title: "TokitoTV - Watch Anime Online Free",
     description:
       "Watch anime online for free on TokitoTV. Stream subbed and dubbed anime episodes without ads.",
-    images: ["/logo.jpg"],
+    images: ["https://tokitotv.com/logo.jpg"],
   },
   robots: {
     index: true,
@@ -66,7 +66,15 @@ export const metadata: Metadata = {
     },
   },
   icons: {
-    icon: "/logo.jpg",
+    icon: [
+      { url: "/logo.jpg", sizes: "any" },
+      { url: "/logo.jpg", type: "image/jpeg", sizes: "192x192" },
+      { url: "/logo.jpg", type: "image/jpeg", sizes: "512x512" },
+    ],
+    apple: "/logo.jpg",
+  },
+  other: {
+    "google-site-verification": "",
   },
   alternates: {
     canonical: "https://tokitotv.com",
@@ -90,6 +98,7 @@ export default function RootLayout({
               name: "TokitoTV",
               alternateName: ["Tokito TV", "Tokito Anime", "Tokito Hub", "Tokito Lab"],
               url: "https://tokitotv.com",
+              image: "https://tokitotv.com/logo.jpg",
               description:
                 "Watch anime online for free. Stream subbed and dubbed anime episodes without ads.",
               potentialAction: {
