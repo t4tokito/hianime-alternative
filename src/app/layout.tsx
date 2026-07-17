@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
-import AdBlockerPopup from "@/components/AdBlockerPopup";
 import { AuthProvider } from "@/lib/auth";
 
 export const metadata: Metadata = {
@@ -115,7 +114,6 @@ export default function RootLayout({
       </head>
       <body className="min-h-full flex flex-col bg-background text-foreground">
         <AuthProvider>
-          <AdBlockerPopup />
           <Navbar />
           <main className="flex-1 pt-16">{children}</main>
           <footer className="border-t border-border py-8 text-center text-muted text-sm">
