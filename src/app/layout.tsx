@@ -76,7 +76,7 @@ export const metadata: Metadata = {
     apple: "/apple-touch-icon.png",
   },
   other: {
-    "google-site-verification": "eWzX1wUO-SoeistSLWcxU_bvznj4wuJCkZUvhnmPQ5o",
+    "google-site-verification": "xfuynF3zDBR-KyGfAJu3whhOzVfbTNGVBAoCfypqszg",
   },
   alternates: {
     canonical: "https://tokitotv.netlify.app",
