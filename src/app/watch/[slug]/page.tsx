@@ -157,7 +157,6 @@ export default function WatchPage() {
                 key={`${malId}-${currentEp}-${activeTab}-${activeServer}`}
                 src={streamUrl}
                 className="w-full h-full"
-                sandbox="allow-scripts allow-same-origin allow-popups-to-escape-sandbox"
                 allowFullScreen
                 allow="autoplay; fullscreen; picture-in-picture; encrypted-media"
                 referrerPolicy="no-referrer"
