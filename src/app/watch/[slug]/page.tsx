@@ -19,6 +19,7 @@ export default function WatchPage() {
 
   const [anime, setAnime] = useState<Anime | null>(null);
   const [loading, setLoading] = useState(true);
+  const [showRedirect, setShowRedirect] = useState(false);
   const [error, setError] = useState(false);
   const [activeTab, setActiveTab] = useState<"sub" | "dub">("sub");
   const [activeServer, setActiveServer] = useState(0);
@@ -157,10 +158,16 @@ export default function WatchPage() {
                 key={`${malId}-${currentEp}-${activeTab}-${activeServer}`}
                 src={streamUrl}
                 className="w-full h-full"
+                style={{ pointerEvents: 'none' }}
                 allowFullScreen
                 allow="autoplay; fullscreen; picture-in-picture; encrypted-media"
                 referrerPolicy="no-referrer"
                 onError={handleStreamError}
+              />
+              {/* Click catcher */}
+              <div
+                className="absolute inset-0 z-10 cursor-pointer"
+                onClick={() => setShowRedirect(true)}
               />
             </div>
           ) : (
@@ -275,6 +282,40 @@ export default function WatchPage() {
           )}
         </div>
       </div>
+
+      {/* Redirect Confirmation Dialog */}
+      {showRedirect && (
+        <div className="fixed inset-0 z-[100] bg-black/70 flex items-center justify-center px-4">
+          <div className="bg-card border border-border rounded-xl p-6 max-w-sm w-full shadow-2xl">
+            <div className="text-center mb-4">
+              <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center mx-auto mb-3">
+                <svg className="w-6 h-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101" />
+                </svg>
+              </div>
+              <h3 className="text-foreground font-semibold mb-1">External Link Detected</h3>
+              <p className="text-muted text-sm">You&apos;re about to visit an external streaming site. Continue?</p>
+            </div>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setShowRedirect(false)}
+                className="flex-1 px-4 py-2.5 rounded-lg bg-surface border border-border text-foreground text-sm font-medium hover:bg-card-hover transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => {
+                  window.open(streamUrl, "_blank");
+                  setShowRedirect(false);
+                }}
+                className="flex-1 px-4 py-2.5 rounded-lg bg-primary text-foreground text-sm font-medium hover:bg-primary/80 transition-colors"
+              >
+                Continue
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
